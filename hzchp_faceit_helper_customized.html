@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HZCHP Faceit helper</title>
+<style>
+:root{
+  --bg:#070711;--sidebar:#0a0a18;--panel:#101022;--panel2:#0d0d1d;
+  --line:#252543;--text:#eef0ff;--muted:#929bc7;--purple:#8b5cf6;
+  --purple2:#602dff;--soft:#24154b;--good:#b6a0ff;
+}
+body[data-theme="ash"]{--bg:#17181d;--sidebar:#1b1c22;--panel:#24252d;--panel2:#202129;--line:#393b46;--text:#f0f0f3;--muted:#a7a9b5;--purple:#a0a4b8;--purple2:#747887;--soft:#353640;--good:#d1d2dc}
+
+body[data-theme="faceit"]{
+  --bg:#101114;--sidebar:#151619;--panel:#1d1f23;--panel2:#181a1d;
+  --line:#34373c;--text:#f4f4f5;--muted:#a4a7ad;--purple:#ff5500;
+  --purple2:#e84b00;--soft:#3a2118;--good:#ff8a4c;
+  --surface:#17191c;--surface-raised:#29211e;--border-strong:#4a3931;
+  --accent-text:#ff9a70;--label:#e0d2cb;--subtle-line:#303236;
+}
+body[data-theme="light"]{--bg:#f2f3f8;--sidebar:#fff;--panel:#fff;--panel2:#f7f8fc;--line:#d9dbea;--text:#22243a;--muted:#666b83;--purple:#8054e8;--purple2:#6940d8;--soft:#eee8ff;--good:#7550d5;background:radial-gradient(ellipse at 70% 0%,#e6ddff 0,transparent 42%),var(--bg)}
+body[data-theme="light"] .sidebar{background:rgba(255,255,255,.94)}
+body[data-theme="light"] .stat,body[data-theme="light"] .panel,body[data-theme="light"] .focus{background:linear-gradient(145deg,#fff,#f8f8fc)}
+body[data-theme="light"] .training-card,body[data-theme="light"] .music-controls,body[data-theme="light"] input[type=date],body[data-theme="light"] input[type=number],body[data-theme="light"] input[type=text],body[data-theme="light"] textarea,body[data-theme="light"] .map-item,body[data-theme="light"] .weakness-row,body[data-theme="light"] .weakness-scale button,body[data-theme="light"] .map-item select,body[data-theme="light"] .filter-select{background:#fff;color:var(--text);border-color:var(--line)}
+body[data-theme="light"] .nav button.active,body[data-theme="light"] .nav button:hover{background:#eee8ff;color:#3d286f;border-color:#d7c8ff}body[data-theme="light"] .btn{background:#f5f3fc;color:#30294a;border-color:#d9d3ec}body[data-theme="light"] .progress,body[data-theme="light"] .weakness-meter{background:#e4e4ef}
+body[data-theme="ash"] .training-card,body[data-theme="ash"] .music-controls,body[data-theme="ash"] input[type=date],body[data-theme="ash"] input[type=number],body[data-theme="ash"] input[type=text],body[data-theme="ash"] textarea,body[data-theme="ash"] .map-item,body[data-theme="ash"] .weakness-row,body[data-theme="ash"] .weakness-scale button,body[data-theme="ash"] .map-item select,body[data-theme="ash"] .filter-select{background:#1b1c23;color:var(--text);border-color:var(--line)}
+.sound-setting{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;border-bottom:1px solid var(--line)}.theme-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px}.theme-choice{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel2);color:var(--text);text-align:left}.theme-choice.active{border-color:var(--purple);box-shadow:0 0 0 2px var(--soft)}.theme-swatch{height:42px;border-radius:8px;margin-bottom:9px;border:1px solid var(--line)}.theme-choice strong{display:block}@media(max-width:900px){.theme-options{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.theme-options{grid-template-columns:1fr}}
+
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 70% 0%,#17102e 0,transparent 40%),var(--bg);color:var(--text);font:15px/1.45 Inter,Segoe UI,Arial,sans-serif}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:grid;grid-template-columns:218px minmax(0,1fr)}
+.sidebar{background:rgba(9,9,23,.94);border-right:1px solid var(--line);padding:26px 18px;display:flex;flex-direction:column;gap:26px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.4px}
+.logo{width:38px;height:38px;border:2px solid var(--purple);color:var(--purple);border-radius:50%;display:grid;place-items:center;font-size:22px}
+.nav{display:grid;gap:8px}.nav button{background:transparent;border:1px solid transparent;color:var(--muted);text-align:left;padding:12px;border-radius:11px}
+.nav button.active,.nav button:hover{background:#211443;color:#eee8ff;border-color:#34205f}
+.sidebottom{margin-top:auto;color:var(--muted)}.sidebottom b{display:block;color:#a994ff;font-size:20px;margin-top:20px}
+main{padding:36px clamp(18px,3vw,44px);max-width:1600px;width:100%;margin:auto}
+.eyebrow{font-size:12px;letter-spacing:3px;color:#a879ff;font-weight:800;text-transform:uppercase}
+.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+h1{font-size:clamp(28px,4vw,48px);line-height:1.05;letter-spacing:-1.4px;margin:10px 0}
+h1 span{color:var(--purple)}.subtitle{margin:0;color:#aeb8e6;font-size:16px}
+.pill{border:1px solid #6035a4;color:#bda5ff;border-radius:99px;padding:9px 15px;font-size:12px;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:26px 0 22px}
+.stat,.panel,.focus{background:linear-gradient(145deg,rgba(18,18,39,.96),rgba(12,12,27,.96));border:1px solid var(--line);border-radius:16px}
+.stat{padding:20px 22px;min-width:0}.statlabel{font-size:13px;color:#b5bce3;text-transform:uppercase;letter-spacing:.5px}
+.statvalue{font-size:34px;font-weight:850;letter-spacing:-1px;margin-top:4px}
+.progress{height:8px;background:#1b1b37;border-radius:20px;overflow:hidden;margin-top:10px}.progress span{height:100%;width:0;background:linear-gradient(90deg,var(--purple2),#b07aff);display:block;transition:width .2s}
+.columns{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:18px;align-items:start}
+.home-extras{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px;align-items:stretch}.home-extras .panel{padding:17px;display:flex;flex-direction:column;min-width:0}.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.mini-field{min-width:0}.mini-field label{display:block;font-size:12px;color:#b5bce3;margin-bottom:5px}.map-list{display:grid;gap:9px}.map-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #29294b;background:#0b0b1b;border-radius:10px;padding:10px 12px}.map-item select,.filter-select{background:#0a0a1b;border:1px solid #343456;border-radius:8px;color:var(--text);padding:7px;max-width:100%}.weakness-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.weakness-row{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:0;padding:11px;border:1px solid #29294b;background:linear-gradient(145deg,#111127,#0b0b1b);border-radius:11px}.weakness-top{display:flex;align-items:center;justify-content:space-between;gap:6px}.weakness-name{font-size:13px;font-weight:700;line-height:1.25}.weakness-score{font-size:12px;color:#c5afff;white-space:nowrap}.weakness-row.priority{border-color:#7046a9;background:linear-gradient(145deg,#21143d,#0c0c1d)}.weakness-scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.weakness-scale button{padding:5px 0;border:1px solid #343456;border-radius:6px;background:#0a0a1b;color:#9da5d2;font-size:12px;line-height:1.2}.weakness-scale button.selected{background:linear-gradient(145deg,#6532fa,#884cff);border-color:#a879ff;color:white;box-shadow:0 0 9px #8b5cf633}.weakness-meter{height:4px;background:#20203b;border-radius:9px;overflow:hidden}.weakness-meter span{height:100%;display:block;background:linear-gradient(90deg,#602dff,#b07aff);border-radius:9px;transition:width .2s}.weakness-row.priority .weakness-meter span{background:linear-gradient(90deg,#a05aff,#d2a6ff)}.weakness-summary{display:flex;flex-direction:column;gap:3px;margin-top:12px;padding:10px 12px;border:1px solid #34245a;border-radius:10px;background:#15102a}.weakness-summary-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#a879ff;font-weight:800}.weakness-summary strong{font-size:13px;overflow-wrap:anywhere}.entry-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}.entry-tag{font-size:11px;color:#c5afff;background:#24164a;border:1px solid #392564;border-radius:99px;padding:3px 8px}.entry-actions{display:flex;justify-content:flex-end;margin-top:10px}.home-recent{margin-top:12px}.mistake-form{display:grid;gap:9px}.mistake-form input,.mistake-form textarea{width:100%}
+@media(max-width:1100px){.home-extras{grid-template-columns:repeat(2,minmax(0,1fr))}.home-extras .panel:last-child{grid-column:1/-1}}
+@media(max-width:620px){.home-extras{grid-template-columns:1fr}.home-extras .panel:last-child{grid-column:auto}.weakness-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.panel{padding:22px;min-width:0}.panelhead{font-size:21px;font-weight:750;margin:0 0 4px;display:flex;gap:10px;align-items:center}.ico{color:#a979ff;font-size:22px}
+.muted{color:var(--muted)}.dayline{margin:8px 0 12px;color:#aeb8e6}
+.tasks{margin-top:14px}.task{display:grid;grid-template-columns:26px minmax(0,1fr);gap:12px;padding:13px 4px;border-bottom:1px solid #22223e;align-items:start}
+.task:last-child{border-bottom:0}.task input{appearance:none;width:23px;height:23px;border:2px solid #6868a7;border-radius:6px;background:#0b0b1b;margin:2px 0;cursor:pointer}
+.task input:checked{background:var(--purple2);border-color:var(--purple);position:relative}.task input:checked:after{content:'✓';display:block;color:white;text-align:center;font-weight:bold;line-height:19px}
+.task.done .tasktitle{text-decoration:line-through;color:#8787ac}
+.tasktitle{font-weight:700}.time{display:inline-block;background:#24164a;color:#bba0ff;border-radius:7px;padding:3px 8px;font-size:12px;font-weight:800;margin-right:8px;white-space:nowrap}
+.taskdesc{color:#a0a9d3;font-size:13px;margin-top:3px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{border:1px solid #34345b;background:#14142b;color:#dce0ff;padding:10px 14px;border-radius:10px}.btn.primary{background:linear-gradient(100deg,#6532fa,#884cff);border-color:transparent;color:white;font-weight:750}.btn:hover{filter:brightness(1.15)}
+.formrow{margin-top:14px}.formrow label{display:block;font-size:13px;color:#c4cbed;margin-bottom:7px}
+input[type=date],input[type=number],input[type=text],textarea{width:100%;background:#0a0a1b;border:1px solid #343456;border-radius:10px;padding:11px 12px;color:var(--text);outline:none}
+input:focus,textarea:focus{border-color:#8b5cf6;box-shadow:0 0 0 3px #8b5cf622}
+textarea{resize:vertical;min-height:76px}::placeholder{color:#6f79a8}
+.save{width:100%;margin-top:14px}
+.focus{margin-top:18px;padding:18px 22px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}.focusicon{font-size:28px;color:#a879ff}.focus input{margin-top:8px}
+.section{display:none}.section.active{display:block}
+.training-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);gap:16px;margin-top:18px}
+.training-card{background:#0c0c1e;border:1px solid #29294b;border-radius:14px;padding:18px;min-width:0}
+.training-card h3{font-size:16px;margin:0 0 12px}
+.timer-display{font-size:38px;font-weight:850;letter-spacing:1px;font-variant-numeric:tabular-nums;margin:10px 0;color:#e9e2ff}
+.timer-controls{display:flex;gap:8px;flex-wrap:wrap}
+.custom-form{display:grid;grid-template-columns:1fr 110px auto;gap:8px;align-items:end}
+.custom-list{display:grid;gap:8px;margin-top:12px}
+.custom-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:#111127;border:1px solid #29294b;border-radius:10px}
+.custom-item .grow{flex:1;min-width:0}
+.custom-item strong{display:block;overflow-wrap:anywhere}
+.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:12px}
+.calendar-head,.calendar-day{text-align:center;font-size:12px;color:#9da5d2;padding:7px 0}
+.calendar-day{border:1px solid #272744;border-radius:8px;min-height:35px;color:#cbd0f1;background:#0b0b1b}
+.calendar-day.done{background:#30205b;border-color:#8957f3;color:#fff}
+.calendar-day.today{outline:2px solid var(--purple);outline-offset:1px}
+.calendar-nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.training-top .progress{margin-top:12px}
+@media(max-width:760px){.training-top{grid-template-columns:1fr}.custom-form{grid-template-columns:1fr 95px}.custom-form button{grid-column:1/-1}}
+.music-layout{display:grid;grid-template-columns:minmax(210px,.65fr) minmax(0,1.35fr);gap:18px;align-items:start}.music-controls{background:#0b0b1b;border:1px solid #22223e;border-radius:12px;padding:15px}.music-controls .formrow:first-child{margin-top:0}.music-player{min-width:0}.music-player iframe{display:block;width:100%;height:480px;border:0;border-radius:12px}.journal-list{display:grid;gap:10px;margin-top:16px}.entry{border:1px solid var(--line);border-radius:11px;padding:13px}.entry strong{color:#c3aaff}.entry p{margin:7px 0 0;color:#b3bbdf;white-space:pre-wrap}
+.music-hub{overflow:hidden}.music-heading-row{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.music-subtitle{margin:5px 0 0}.music-count{font-size:12px;border:1px solid var(--line);background:var(--panel2);border-radius:99px;padding:7px 11px;color:var(--muted);white-space:nowrap}.music-hub-layout{grid-template-columns:minmax(260px,.72fr) minmax(0,1.28fr);gap:16px;margin-top:20px}.music-controls{background:var(--panel2);border-color:var(--line)}.music-section-label{font-size:10px;letter-spacing:1.35px;font-weight:800;color:var(--muted)}.music-add-btn{width:100%;justify-content:center;margin-top:5px}.music-status{min-height:18px;margin-top:10px;line-height:1.4}.music-divider{height:1px;background:var(--line);margin:18px 0}.music-library-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.music-search,.music-filter{width:100%;margin-bottom:8px}.music-library-list{display:grid;gap:8px;margin-top:5px;max-height:440px;overflow:auto;padding-right:2px}.music-library-item{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--surface,var(--panel));color:var(--text);min-width:0;transition:border-color .15s,background .15s}.music-library-item:hover,.music-library-item.active{border-color:var(--purple);background:var(--surface-raised,var(--soft));box-shadow:0 0 0 1px color-mix(in srgb,var(--purple) 16%,transparent)}.music-service-mark{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-weight:850;font-size:18px;background:var(--soft);color:var(--purple);border:1px solid var(--line)}.music-service-mark.spotify{color:#1ed760;background:#12251a}.music-service-mark.soundcloud{color:#ff6a1a;background:#2b1a12}.music-service-mark.yandex{color:#ff4b4b;background:#2b171a}.music-item-info{min-width:0}.music-item-title{font-weight:750;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.music-item-service{font-size:11px;color:var(--muted);margin-top:3px}.music-item-play{color:var(--purple);font-size:18px}.music-player-panel{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--panel2);padding:15px}.music-now-head{display:flex;gap:13px;align-items:center;margin-bottom:14px;min-width:0}.music-now-cover{width:58px;height:58px;flex:0 0 58px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--soft),var(--panel));border:1px solid var(--line);color:var(--purple);font-size:29px;box-shadow:0 5px 24px color-mix(in srgb,var(--purple) 13%,transparent)}.music-now-meta{min-width:0}.music-now-meta h3{margin:4px 0 3px;font-size:18px;overflow-wrap:anywhere}.music-player-wrap iframe{display:block;width:100%;height:480px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text)}.music-empty{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:25px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);gap:8px}.music-empty strong{color:var(--text);font-size:16px}.music-empty p{max-width:310px;margin:0;font-size:13px}.music-empty-icon{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:var(--soft);border:1px solid var(--line);color:var(--purple);font-size:28px;margin-bottom:5px}.music-player-footer{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}.music-volume-head{display:flex;justify-content:space-between;gap:10px;align-items:center;font-weight:700;font-size:13px}.music-volume-head span{color:var(--purple);font-variant-numeric:tabular-nums}.music-volume-row{display:flex;align-items:center;gap:10px;margin-top:8px;color:var(--muted)}.music-volume-row input{width:100%;accent-color:var(--purple)}.music-player-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.music-player-actions .btn{font-size:12px;padding:8px 10px}.music-player-actions .btn:disabled{opacity:.45;cursor:not-allowed}.music-player-actions .danger{color:#ff8585}.music-library-list .empty{padding:15px;text-align:center;border:1px dashed var(--line);border-radius:10px;font-size:12px;color:var(--muted)}
+body[data-theme="light"] .music-controls,body[data-theme="light"] .music-player-panel{background:#fff}body[data-theme="light"] .music-library-item{background:#fafaff}body[data-theme="light"] .music-library-item.active,body[data-theme="light"] .music-library-item:hover{background:#f0eaff}body[data-theme="light"] .music-service-mark.spotify{background:#e7f8ed}body[data-theme="light"] .music-service-mark.soundcloud{background:#fff0e6}body[data-theme="light"] .music-service-mark.yandex{background:#fff0f0}body[data-theme="ash"] .music-service-mark.spotify{background:#18251c}body[data-theme="ash"] .music-service-mark.soundcloud{background:#2b211c}body[data-theme="ash"] .music-service-mark.yandex{background:#2a1d20}
+
+.history{display:grid;gap:8px;margin-top:14px}.historyrow{display:grid;grid-template-columns:1fr 100px auto;gap:8px;align-items:center}
+.small{font-size:12px}.empty{color:var(--muted);padding:14px 0}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{padding:14px 16px;gap:12px;border-right:0;border-bottom:1px solid var(--line)}.nav{grid-template-columns:repeat(4,minmax(0,1fr))}.nav button{text-align:center;padding:9px 5px;font-size:12px}.sidebottom{display:none}main{padding:22px 16px}.columns{grid-template-columns:1fr}.stats{gap:10px}.stat{padding:15px}.statvalue{font-size:27px}}
+@media(max-width:680px){.music-layout{grid-template-columns:1fr}.music-player iframe{height:380px}.music-player-panel{padding:12px}.music-library-list{max-height:320px}}\n@media(max-width:520px){.top{display:block}.pill{display:inline-block;margin-top:14px}.stats{grid-template-columns:1fr}.statvalue{font-size:28px}.panel{padding:16px}.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.historyrow{grid-template-columns:1fr 90px auto}}
+
+
+/* Refined compact home layout and number fields */
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+#home .columns{grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:12px;align-items:stretch}
+#home .columns>.panel{min-width:0}
+#home .columns>.panel:nth-child(2){min-height:100%;}
+#home .home-extras{grid-template-columns:minmax(0,1fr);margin-top:12px;gap:12px}
+#home .home-extras .panel{padding:15px}
+#home .home-extras .panelhead{font-size:18px}
+#home .home-extras p{margin:5px 0 10px}
+.file-picker{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px;border:1px dashed #4b3a79;background:linear-gradient(135deg,#15102a,#0b0b1b);border-radius:12px}
+.file-picker input[type=file]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.file-picker .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:124px}
+.file-picker .file-name{color:var(--muted);font-size:13px;overflow-wrap:anywhere;min-width:0;flex:1}
+.file-picker:focus-within{border-color:#8b5cf6;box-shadow:0 0 0 3px #8b5cf622}
+@media(max-width:1100px){#home .columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:760px){#home .columns{grid-template-columns:1fr}}
+
+/* Unified purple SVG navigation icons */
+.nav-icon{
+  width:22px;height:22px;flex:0 0 22px;display:block;
+  color:#a879ff;stroke:currentColor;fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 4px #8b5cf655);
+  transition:color .2s,filter .2s;
+}
+.nav button{display:flex;align-items:center;gap:10px}
+.nav button.active .nav-icon,.nav button:hover .nav-icon{
+  color:#c3aaff;filter:drop-shadow(0 0 6px #8b5cf6aa);
+}
+.section-icon{
+  width:23px;height:23px;flex:0 0 23px;display:block;
+  color:#a879ff;stroke:currentColor;fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 4px #8b5cf655);
+}
+
+
+/* Complete theme pass: every surface, control, label and state follows the selected palette */
+body[data-theme="dark"]{
+  --bg:#070711;--sidebar:#0a0a18;--panel:#101022;--panel2:#0d0d1d;
+  --line:#252543;--text:#eef0ff;--muted:#929bc7;--purple:#8b5cf6;
+  --purple2:#602dff;--soft:#24154b;--good:#b6a0ff;
+  --surface:#0b0b1b;--surface-raised:#15102a;--border-strong:#343456;
+  --accent-text:#c5afff;--label:#c4cbed;--subtle-line:#22223e;
+}
+body[data-theme="ash"]{
+  --bg:#17181d;--sidebar:#1b1c22;--panel:#24252d;--panel2:#202129;
+  --line:#393b46;--text:#f0f0f3;--muted:#a7a9b5;--purple:#b0b4c5;
+  --purple2:#777d91;--soft:#353640;--good:#d1d2dc;
+  --surface:#1b1c23;--surface-raised:#2b2c35;--border-strong:#484a57;
+  --accent-text:#d4d6e0;--label:#c4c6d0;--subtle-line:#383a45;
+}
+body[data-theme="light"]{
+  --bg:#f2f3f8;--sidebar:#ffffff;--panel:#ffffff;--panel2:#f7f8fc;
+  --line:#d9dbea;--text:#22243a;--muted:#666b83;--purple:#8054e8;
+  --purple2:#6940d8;--soft:#eee8ff;--good:#7550d5;
+  --surface:#ffffff;--surface-raised:#f3f0fb;--border-strong:#c9c4dc;
+  --accent-text:#5a3a9d;--label:#484b65;--subtle-line:#e2e3ee;
+}
+body{background:radial-gradient(ellipse at 70% 0%,color-mix(in srgb,var(--purple) 12%,transparent) 0,transparent 42%),var(--bg);color:var(--text);transition:background-color .18s,color .18s}
+.sidebar{background:var(--sidebar);border-color:var(--line)}
+.brand,.panelhead,h1,h2,h3,h4,strong,label{color:var(--text)}
+.eyebrow,.ico,.section-icon,.nav-icon,.focusicon{color:var(--purple);filter:none}
+.subtitle,.dayline,.statlabel,.taskdesc,.formrow label,.mini-field label,.calendar-head,.calendar-day,.muted{color:var(--muted)}
+.pill{border-color:var(--line);color:var(--accent-text);background:var(--panel2)}
+.stat,.panel,.focus{background:linear-gradient(145deg,var(--panel),var(--panel2));border-color:var(--line);color:var(--text)}
+.nav button{color:var(--muted)}
+.nav button.active,.nav button:hover{background:var(--soft);color:var(--text);border-color:var(--line)}
+.nav button.active .nav-icon,.nav button:hover .nav-icon{color:var(--purple);filter:none}
+.btn{background:var(--panel2);color:var(--text);border-color:var(--line)}
+.btn.primary{background:linear-gradient(100deg,var(--purple2),var(--purple));color:#fff;border-color:transparent}
+input[type=date],input[type=number],input[type=text],input[type=range],textarea,select,
+.map-item select,.filter-select,.training-card,.music-controls,.custom-item,.map-item,
+.weakness-row,.weakness-scale button,.calendar-day,.task input{
+  color:var(--text);border-color:var(--line)
+}
+input[type=date],input[type=number],input[type=text],textarea,select,.map-item select,.filter-select,
+.training-card,.music-controls,.custom-item,.map-item,.weakness-row,.weakness-scale button,
+.calendar-day,.task input{background:var(--surface)}
+input:focus,textarea:focus,select:focus{border-color:var(--purple);box-shadow:0 0 0 3px color-mix(in srgb,var(--purple) 16%,transparent)}
+::placeholder{color:var(--muted);opacity:.8}
+.progress,.weakness-meter{background:var(--subtle-line)}
+.progress span,.weakness-meter span{background:linear-gradient(90deg,var(--purple2),var(--purple))}
+.task{border-color:var(--subtle-line)}
+.task input:checked{background:var(--purple2);border-color:var(--purple)}
+.time,.entry-tag{background:var(--soft);color:var(--accent-text);border-color:var(--line)}
+.entry,.historyrow,.journal-list .entry{border-color:var(--line);background:var(--panel2)}
+.entry strong{color:var(--accent-text)}
+.entry p{color:var(--muted)}
+.weakness-row.priority{border-color:var(--purple);background:var(--surface-raised)}
+.weakness-score,.weakness-summary-label{color:var(--accent-text)}
+.weakness-summary{background:var(--surface-raised);border-color:var(--line)}
+.weakness-scale button{background:var(--surface);color:var(--muted)}
+.weakness-scale button.selected{background:var(--purple2);border-color:var(--purple);color:#fff;font-weight:800;box-shadow:0 0 0 2px color-mix(in srgb,var(--purple) 28%,transparent);transform:translateY(-1px)}
+/* Skill focus scale: low scores red, middle follows theme, high scores green/turquoise */
+.weakness-scale button:nth-child(1).selected,.weakness-scale button:nth-child(2).selected{background:#d94350;border-color:#ff6570;box-shadow:0 0 0 2px #d943504d,0 0 12px #d9435033}
+.weakness-scale button:nth-child(3).selected{background:var(--purple2);border-color:var(--purple);box-shadow:0 0 0 2px color-mix(in srgb,var(--purple) 32%,transparent),0 0 12px color-mix(in srgb,var(--purple) 24%,transparent)}
+.weakness-scale button:nth-child(4).selected{background:#249b59;border-color:#42d982;box-shadow:0 0 0 2px #249b594d,0 0 12px #249b5933}
+.weakness-scale button:nth-child(5).selected{background:#079eaa;border-color:#35e0e8;box-shadow:0 0 0 2px #079eaa4d,0 0 12px #079eaa33}
+.calendar-day.done{background:var(--soft);border-color:var(--purple);color:var(--text)}
+.file-picker{border-color:var(--line);background:linear-gradient(135deg,var(--surface-raised),var(--surface))}
+.file-picker:focus-within{border-color:var(--purple);box-shadow:0 0 0 3px color-mix(in srgb,var(--purple) 16%,transparent)}
+.theme-choice{background:var(--panel2);color:var(--text);border-color:var(--line)}
+.theme-choice.active{border-color:var(--purple);box-shadow:0 0 0 2px var(--soft)}
+.sound-setting{border-color:var(--line)}
+.sidebottom,.sidebottom .small{color:var(--muted)!important}
+.sidebottom b{color:var(--accent-text)}
+body[data-theme="ash"] .btn.primary{color:#fff}
+body[data-theme="light"] .nav button.active,body[data-theme="light"] .nav button:hover{background:var(--soft);color:var(--text);border-color:var(--line)}
+body[data-theme="light"] .btn.primary{color:#fff}
+
+
+/* Stylish segmented selectors for the lineup library */
+.choice-field{min-width:0}
+.choice-native{display:none!important}
+.choice-buttons{display:grid;gap:7px;margin-top:7px}
+.map-choices{grid-template-columns:repeat(4,minmax(0,1fr))}
+.grenade-choices{grid-template-columns:repeat(2,minmax(0,1fr))}
+.side-choices{grid-template-columns:repeat(3,minmax(0,1fr))}
+.choice-btn{min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--muted);font:inherit;font-size:12px;cursor:pointer;transition:background .16s,border-color .16s,transform .16s;white-space:nowrap}
+.choice-btn:hover{border-color:var(--purple);color:var(--text);transform:translateY(-1px)}
+.choice-btn.selected{background:linear-gradient(135deg,var(--soft),var(--surface-raised));border-color:var(--purple);color:var(--accent-text);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--purple) 20%,transparent)}
+.grenade-symbol{font-size:17px;line-height:1;color:var(--purple)}
+.side-symbol{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 4px;border-radius:6px;background:var(--soft);color:var(--accent-text);font-size:10px;font-weight:800}
+@media(max-width:620px){.map-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.side-choices{grid-template-columns:1fr}.choice-btn{white-space:normal}}
+
+.lineup-save-btn{margin-top:10px}
+
+/* Align the lineup save button below the link field with comfortable spacing */
+#lineupImagePreview img{display:block;max-width:100%;max-height:360px;border:1px solid var(--line);border-radius:12px;object-fit:contain}
+#addLineup{
+  display:inline-flex;
+  margin-top:12px !important;
+  align-self:flex-start;
+}
+
+
+.lineup-upload{display:grid;gap:10px}.lineup-upload input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.lineup-upload-btn{display:flex!important;align-items:center;gap:0;padding:16px 18px;border:1px solid var(--purple);border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--purple) 17%,var(--surface)),var(--surface));cursor:pointer;transition:.18s}
+.lineup-upload-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px color-mix(in srgb,var(--purple) 18%,transparent)}
+.lineup-upload-btn strong,.lineup-upload-btn small{display:block}.lineup-upload-btn small{font-size:12px;color:var(--muted);margin-top:3px}.upload-glyph{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--purple);color:#fff;font-size:25px}
+.lineup-paste-zone{padding:11px 13px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:13px;outline:none}.lineup-paste-zone:focus,.lineup-paste-zone.dragover{border-color:var(--purple);background:color-mix(in srgb,var(--purple) 8%,transparent)}
+.lineup-filter{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.lineup-filter label{font-weight:700}.lineup-filter select{min-width:200px;flex:1}
+.grenade-symbol{display:inline-grid;place-items:center;width:22px;height:22px;vertical-align:middle;margin-right:5px}.grenade-symbol svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+
+.upload-glyph svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;display:block}.upload-glyph{display:flex;align-items:center;justify-content:center}
+.nav-icon.lineup-nav-grenade,.section-icon.lineup-heading-grenade{fill:var(--purple);stroke:none;filter:none}\n/* Volume control and ELO chart */
+.volume-master{margin-top:18px;padding:20px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,var(--panel2),var(--surface))}.volume-master-head{display:flex;justify-content:space-between;align-items:center;gap:14px}.volume-value{font-size:25px;font-weight:850;color:var(--purple);font-variant-numeric:tabular-nums}.volume-slider-row{display:flex;align-items:center;gap:14px;margin-top:16px;color:var(--purple);font-size:20px}#siteVolume{width:100%;accent-color:var(--purple);cursor:pointer}.volume-meter{height:6px;border-radius:99px;background:var(--subtle-line);overflow:hidden;margin-top:8px}.volume-meter span{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--purple2),var(--purple));border-radius:inherit;transition:width .12s}.elo-layout{display:grid;grid-template-columns:minmax(300px,.82fr) minmax(0,1.18fr);gap:16px;align-items:start}.elo-chart-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.elo-current{display:grid;text-align:right;gap:2px}.elo-current strong{font-size:24px;color:var(--purple)}.elo-chart{width:100%;min-height:280px;margin-top:18px;overflow:hidden}.elo-chart svg{width:100%;height:auto;display:block;overflow:visible}.elo-chart .chart-grid{stroke:var(--line);stroke-dasharray:3 5}.elo-chart .chart-label{fill:var(--muted);font:11px Inter,Segoe UI,Arial,sans-serif}.elo-chart .chart-line{fill:none;stroke:var(--purple);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.elo-chart .chart-area{fill:var(--purple);opacity:.12}.elo-chart .chart-dot{fill:var(--panel);stroke:var(--purple);stroke-width:2.5}@media(max-width:900px){.elo-layout{grid-template-columns:1fr}}
+
+/* HZCHP native music player — no third-party player widgets */
+.music-player-wrap iframe,.music-player iframe{display:none!important}
+.music-native-player{border:1px solid var(--line);border-radius:13px;padding:18px;background:var(--surface,var(--panel));}
+.music-native-art{height:180px;border-radius:12px;display:grid;place-items:center;margin-bottom:17px;background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--purple) 34%,transparent),transparent 58%),linear-gradient(135deg,var(--panel2),var(--soft));border:1px solid var(--line);color:var(--purple);font-size:58px;position:relative;overflow:hidden}
+.music-native-art:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 17px,color-mix(in srgb,var(--purple) 6%,transparent) 18px 19px);pointer-events:none}
+.music-track-title{font-size:16px;font-weight:800;overflow-wrap:anywhere;margin:0 0 4px}.music-track-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+.music-progress{width:100%;accent-color:var(--purple);cursor:pointer;margin:0}.music-time-row{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums;margin-top:3px}
+.music-transport{display:flex;align-items:center;justify-content:center;gap:17px;margin:17px 0}.music-transport button{border:0;background:transparent;color:var(--text);font-size:20px;cursor:pointer;width:38px;height:38px;border-radius:50%}.music-transport button:hover{background:var(--soft);color:var(--purple)}.music-transport .music-play-main{width:48px;height:48px;background:var(--purple);color:white;font-size:21px;box-shadow:0 0 24px color-mix(in srgb,var(--purple) 28%,transparent)}
+.music-native-volume{display:flex;align-items:center;gap:10px;margin-top:12px}.music-native-volume input{width:100%;accent-color:var(--purple)}
+.music-file-add{display:flex;gap:8px;flex-wrap:wrap}.music-file-add input[type=file]{display:none}.music-dropzone{border:1px dashed var(--line);border-radius:10px;padding:12px;text-align:center;color:var(--muted);font-size:12px;margin-top:9px;cursor:pointer}.music-dropzone.dragover{border-color:var(--purple);background:var(--soft)}
+.music-type-tag{font-size:10px;color:var(--muted);margin-top:4px}.music-library-item{grid-template-columns:40px minmax(0,1fr) auto}.music-library-item .music-item-play{font-size:16px}
+
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="logo" aria-label="FACEIT logo">
+    <svg viewBox="0 0 48 48" width="27" height="27" role="img" aria-label="FACEIT">
+      <path d="M7 9 L27 9 L17 19 L35 19 L25 29 L7 29 L17 19 Z" fill="currentColor"/>
+      <path d="M25 29 L41 29 L31 39 L15 39 Z" fill="currentColor" opacity=".58"/>
+    </svg>
+  </div><div>HZCHP<br>FACEIT HELPER</div></div>
+  <nav class="nav">
+    <button class="active" data-section="home"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5.5 9v11h13V9M9.5 20v-6h5v6"/></svg><span>Главная</span></button>
+    <button data-section="journal"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h3"/><path d="m14 16 1.5 1.5L19 14"/></svg><span>Дневник</span></button>
+    <button data-section="elo"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16"/><path d="m6 15 5-5 4 2 5-7"/><path d="M14 5h6v6"/></svg><span>ELO</span></button>
+    <button data-section="demos"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4V20H6z"/><path d="M14 3.5V8h4M9 12h6M9 15h6M9 18h4"/><path d="m3 6 0 15h13" opacity=".65"/></svg><span>Демо-файлы</span></button>
+    <button data-section="music"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/><path d="M9 8l11-2"/></svg><span>Музыка</span></button>
+    <button data-section="lineups"><svg class="nav-icon lineup-nav-grenade" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><path d="M7.1 7.4 4.8 9.7l-.2 2.1 1.5 1.2 1.5-2.1 1.7-2.2z" opacity=".72"/><path d="M8.1 7.4 6.7 5.8 8.9 3.5l4.4.4 2.2 2.1-.7 2.2-2.1 1.1z"/><path d="M9 8.1 17.2 9.5 19.3 19l-2 2.1-8-1.4-2-2.3z"/><path d="m7.8 11.1 10.6 1.8-.4 1.9-10.6-1.9z" fill="var(--panel)"/><path d="m7.1 16.4 10.5 1.8-.4 1.9-10.4-1.9z" fill="var(--panel)"/><circle cx="11.7" cy="5.7" r=".65" fill="var(--panel)"/></g></svg><span>Раскидки</span></button>
+    <button data-section="settings"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.5a7.4 7.4 0 0 0 0-3l1.6-1.2-1.8-3.1-1.9.7a7.3 7.3 0 0 0-2.6-1.5L14 3h-4l-.3 2.4A7.3 7.3 0 0 0 7.1 7l-1.9-.7-1.8 3.1L5 10.6a7.4 7.4 0 0 0 0 3l-1.6 1.2 1.8 3.1 1.9-.7a7.3 7.3 0 0 0 2.6 1.5L10 21h4l.3-2.4a7.3 7.3 0 0 0 2.6-1.5l1.9.7 1.8-3.1z"/></svg><span>Настройки</span></button>
+  </nav>
+  <div class="sidebottom">«Отдых — часть успеха. Без хорошего отдыха ты не можешь хорошо играть в CS.»<div class="small" style="margin-top:7px;color:#a879ff">— donk</div><b>♟ CS2</b></div>
+</aside>
+<main>
+  <div class="top"><div><div class="eyebrow">Personal training hub</div><h1>HZCHP <span>FACEIT HELPER</span></h1></div></div>
+  <section id="home" class="section active">
+    <div class="stats">
+      <div class="stat"><div class="statlabel">Текущий ELO</div><div class="statvalue"><input id="eloInput" type="text" inputmode="numeric" pattern="[0-9]*" value="1600" aria-label="Текущий ELO" autocomplete="off" style="font-size:30px;font-weight:850;border:0;background:transparent;padding:0;height:auto"></div><div class="progress"><span id="eloBar"></span></div></div>
+      <div class="stat"><div class="statlabel">Личный пик</div><div class="statvalue">1816</div></div>
+      <div class="stat"><div class="statlabel">До 2000 ELO</div><div class="statvalue" id="remaining">400</div></div>
+    </div>
+    <div class="columns">
+      <section class="panel">
+        <h2 class="panelhead"><svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h3"/><path d="m14 16 1.5 1.5L19 14"/></svg> Дневник тренировки</h2>
+        
+        <div class="quick-grid"><div class="mini-field"><label for="journalDate">Дата</label><input id="journalDate" type="date"></div><div class="mini-field"><label for="sessionType">Тип тренировки</label><select id="sessionType" class="filter-select" style="width:100%"><option>Aim</option><option>Deathmatch</option><option>Карты и префайры</option><option>Гранаты</option><option>Premier / FACEIT</option><option>Демо-разбор</option><option>Другое</option></select></div><div class="mini-field"><label for="sessionMinutes">Длительность (мин)</label><input id="sessionMinutes" type="number" min="0" max="600" placeholder="Напр. 45"></div><div class="mini-field"><label for="sessionRating">Оценка сессии</label><select id="sessionRating" class="filter-select" style="width:100%"><option value="">Не указана</option><option value="1">1 / 5</option><option value="2">2 / 5</option><option value="3">3 / 5</option><option value="4">4 / 5</option><option value="5">5 / 5</option></select></div></div>
+        <div class="formrow"><label for="good">Что сегодня получалось?</label><textarea id="good"></textarea></div>
+        <div class="formrow"><label for="weak">Что было слабым местом?</label><textarea id="weak"></textarea></div>
+        <div class="formrow"><label for="next">Что исправить в следующий раз?</label><textarea id="next"></textarea></div>
+        <button class="btn primary save" id="saveEntry">✓ Сохранить запись</button><div class="actions"><button class="btn" id="clearJournalForm" type="button">Очистить форму</button><button class="btn" data-section-link="journal" type="button">Вся история →</button></div>
+        <div id="saveMessage" class="muted" role="status" style="margin-top:8px"></div>
+      </section>
+      <section class="panel"><h2 class="panelhead">Фокус навыков</h2><div class="muted" style="font-size:13px;margin:2px 0 12px">Выбери уровень каждого навыка · 1 — подтянуть, 5 — уверенно</div><div class="weakness-grid" id="weaknessChecklist"></div><div id="weaknessSummary" class="weakness-summary"></div></section>
+    </div>
+    <div class="home-extras">
+      <section class="panel"><h2 class="panelhead">Разбор ошибок</h2><p class="muted small">Запиши одну повторяющуюся ошибку и конкретное исправление.</p><div class="mistake-form"><input id="mistakeTitle" type="text" placeholder="Ошибка: например, пик без флешки"><textarea id="mistakeFix" placeholder="Что сделаю иначе в следующем матче"></textarea><button class="btn primary" id="addMistake">＋ Добавить вывод</button></div><div id="mistakeList" class="journal-list"></div></section>
+    </div>
+  </section>
+  <section id="training" class="section">
+    <div class="panel">
+      <h2 class="panelhead"><span class="ico">⌖</span> Тренировки</h2>
+      <div class="training-top">
+        <div class="training-card">
+          <h3>Тренировка дня <span class="muted small" id="trainingProgressLabel">0 / 5</span></h3>
+          <div class="progress"><span id="trainingProgressBar"></span></div>
+          <div class="tasks" id="trainingTasks">
+            <label class="task"><input type="checkbox" data-task="0"><div><div class="tasktitle"><span class="time">15 мин</span>Aim & First Bullet</div></div></label>
+            <label class="task"><input type="checkbox" data-task="1"><div><div class="tasktitle"><span class="time">15–20 мин</span>Movement & Counter-strafe</div></div></label>
+            <label class="task"><input type="checkbox" data-task="2"><div><div class="tasktitle"><span class="time">15–20 мин</span>Map Practice</div></div></label>
+            <label class="task"><input type="checkbox" data-task="3"><div><div class="tasktitle"><span class="time">10 мин</span>Spray Control</div></div></label>
+            <label class="task"><input type="checkbox" data-task="4"><div><div class="tasktitle"><span class="time">5 мин</span>Разбор ошибок</div></div></label>
+          </div>
+          <div class="actions"><button class="btn primary" id="resetTasks">↻ Сбросить</button><button class="btn" id="allTasks">✓ Отметить всё</button></div>
+        </div>
+        <div class="training-card">
+          <h3>Таймер блока</h3>
+          <label class="small muted" for="timerMinutes">Длительность, минут</label>
+          <input id="timerMinutes" type="number" min="1" max="180" value="15" style="margin-top:6px">
+          <div class="timer-display" id="timerDisplay">15:00</div>
+          <div class="timer-controls">
+            <button class="btn primary" id="timerStart">▶ Старт</button>
+            <button class="btn" id="timerPause">Ⅱ Пауза</button>
+            <button class="btn" id="timerReset">↻ Сброс</button>
+          </div>
+          <div class="muted small" id="timerStatus" style="margin-top:10px">Готов к разминке.</div>
+        </div>
+      </div>
+      <div class="training-top">
+        <div class="training-card">
+          <div class="calendar-nav"><h3 style="margin:0">Календарь занятий</h3><div class="actions" style="margin:0"><button class="btn" id="calendarPrev" aria-label="Предыдущий месяц">‹</button><button class="btn" id="calendarNext" aria-label="Следующий месяц">›</button></div></div>
+          <div class="muted small" id="calendarMonth" style="margin-top:8px"></div>
+          <div class="calendar" id="calendarGrid"></div>
+        </div>
+        <div class="training-card">
+          <h3>Свой план</h3>
+          <div class="custom-form">
+            <div><label class="small muted" for="customName">Упражнение</label><input id="customName" type="text" placeholder="Например, pre-aim"></div>
+            <div><label class="small muted" for="customDuration">Минуты</label><input id="customDuration" type="number" min="1" max="180" value="10"></div>
+            <button class="btn primary" id="addCustom">＋ Добавить</button>
+          </div>
+          <div class="custom-list" id="customList"></div>
+        </div>
+      </div>
+      <div class="training-card" style="margin-top:16px">
+        <h3>Фокус недели</h3>
+        <input id="weeklyFocus" type="text" placeholder="Например: контр-стрейф и первый выстрел">
+      </div>
+    </div>
+  </section>
+  <section id="journal" class="section">
+    <div class="panel"><h2 class="panelhead"><svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h3"/><path d="m14 16 1.5 1.5L19 14"/></svg> История дневника</h2><div class="actions" style="margin:10px 0"><input id="journalSearch" type="text" placeholder="Поиск по заметкам…" style="flex:1;min-width:180px"><select id="journalFilter" class="filter-select"><option value="all">Все типы</option><option>Aim</option><option>Deathmatch</option><option>Карты и префайры</option><option>Гранаты</option><option>Premier / FACEIT</option><option>Демо-разбор</option><option>Другое</option></select></div><div class="muted small" id="journalSummary"></div><div class="journal-list" id="entries"><div class="empty">Пока нет записей.</div></div></div>
+  </section>
+  <section id="elo" class="section"><div class="elo-layout">
+    <div class="panel"><h2 class="panelhead"><svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16"/><path d="m6 15 5-5 4 2 5-7"/><path d="M14 5h6v6"/></svg> История ELO</h2><div class="formrow"><label for="eloDate">Дата</label><input id="eloDate" type="date"></div><div class="formrow"><label for="eloValue">ELO после сессии</label><input id="eloValue" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="" autocomplete="off"></div><div class="actions"><button class="btn primary" id="addElo">Добавить точку</button><button class="btn" id="exportData">Экспорт данных JSON</button></div><div class="history" id="eloHistory"><div class="empty">История пока пустая.</div></div></div>
+    <div class="panel"><div class="elo-chart-heading"><div><h2 class="panelhead">Динамика ELO</h2><div class="muted small">Изменение рейтинга по сохранённым датам</div></div><div class="elo-current"><span class="muted small">Последняя отметка</span><strong id="eloChartCurrent">—</strong></div></div><div id="eloChart" class="elo-chart"><div class="empty">Добавь отметки ELO — здесь появится график.</div></div></div>
+  </div></section>
+  <section id="demos" class="section">
+    <div class="panel">
+      <h2 class="panelhead"><svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4V20H6z"/><path d="M14 3.5V8h4M9 12h6M9 15h6M9 18h4"/><path d="m3 6 0 15h13" opacity=".65"/></svg> Хранилище демок</h2>
+      <p class="muted">Сложи сюда скачанные демки, которые хочешь посмотреть позже. Файлы остаются в этом браузере на этом устройстве. Для больших демок лучше хранить оригиналы в отдельной папке, а здесь — список и заметки.</p>
+      <div class="formrow">
+        <label for="demoFiles">Добавить демки (.dem) или другие файлы</label>
+        <div class="file-picker"><input id="demoFiles" type="file" multiple accept=".dem,.zip,.rar,.7z,.txt,.json,video/*"><label class="btn primary" for="demoFiles"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2.2h6.5A2.5 2.5 0 0 1 21 9.7v7.8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><path d="M12 11v6m-3-3 3-3 3 3"/></svg>Обзор файлов</label><span class="file-name" id="demoFileName">Файлы не выбраны</span></div>
+      </div>
+      <div class="formrow">
+        <label for="demoNote">Заметка к добавлению (необязательно)</label>
+        <input id="demoNote" type="text" placeholder="">
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="addDemos">Добавить в список</button>
+        <button class="btn" id="clearDemos">Очистить список</button>
+      </div>
+      <p class="muted small">Важно: браузерное хранилище может очищаться настройками браузера. Этот список хранит выбранные файлы в текущем браузере; не очищай данные сайта/браузера, если хочешь сохранить их здесь. Экспортируй резервную копию важных файлов отдельно.</p>
+      <div class="journal-list" id="demoList"><div class="empty">Пока нет демок. Выбери файлы выше, чтобы добавить их сюда.</div></div>
+    </div>
+  </section>
+  <section id="lineups" class="section">
+    <div class="panel">
+      <h2 class="panelhead"><svg class="section-icon lineup-heading-grenade" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><path d="M7.1 7.4 4.8 9.7l-.2 2.1 1.5 1.2 1.5-2.1 1.7-2.2z" opacity=".72"/><path d="M8.1 7.4 6.7 5.8 8.9 3.5l4.4.4 2.2 2.1-.7 2.2-2.1 1.1z"/><path d="M9 8.1 17.2 9.5 19.3 19l-2 2.1-8-1.4-2-2.3z"/><path d="m7.8 11.1 10.6 1.8-.4 1.9-10.6-1.9z" fill="var(--panel)"/><path d="m7.1 16.4 10.5 1.8-.4 1.9-10.4-1.9z" fill="var(--panel)"/><circle cx="11.7" cy="5.7" r=".65" fill="var(--panel)"/></g></svg> База раскидок</h2>
+      <div class="quick-grid" style="margin-bottom:14px">
+        <div class="mini-field choice-field"><label>Карта</label><div class="choice-buttons map-choices" data-for="lineupMap">
+          <button type="button" class="choice-btn selected" data-value="Mirage">Mirage</button><button type="button" class="choice-btn" data-value="Inferno">Inferno</button><button type="button" class="choice-btn" data-value="Ancient">Ancient</button><button type="button" class="choice-btn" data-value="Nuke">Nuke</button><button type="button" class="choice-btn" data-value="Dust2">Dust2</button><button type="button" class="choice-btn" data-value="Anubis">Anubis</button><button type="button" class="choice-btn" data-value="Overpass">Overpass</button><button type="button" class="choice-btn" data-value="Vertigo">Vertigo</button>
+        </div><select id="lineupMap" class="choice-native"><option>Mirage</option><option>Inferno</option><option>Ancient</option><option>Nuke</option><option>Dust2</option><option>Anubis</option><option>Overpass</option><option>Vertigo</option></select></div>
+        <div class="mini-field choice-field"><label>Тип гранаты</label><div class="choice-buttons grenade-choices" data-for="lineupType">
+          <button type="button" class="choice-btn selected" data-value="Дым">Дым</button><button type="button" class="choice-btn" data-value="Флешка">Флешка</button><button type="button" class="choice-btn" data-value="Молотов">Молотов</button><button type="button" class="choice-btn" data-value="HE">HE</button>
+        </div><select id="lineupType" class="choice-native"><option>Дым</option><option>Флешка</option><option>Молотов</option><option>HE</option></select></div>
+        <div class="mini-field"><label for="lineupName">Название</label><input id="lineupName" type="text" placeholder="Название раскидки"></div>
+      </div>
+      <div class="formrow"><label>Скриншот гранаты</label><div class="lineup-upload"><input id="lineupImage" type="file" accept="image/*"><label for="lineupImage" class="lineup-upload-btn"><span><strong>Выбрать скриншот</strong><small>PNG, JPG или вставь изображение через Ctrl + V</small></span></label><div id="lineupPasteZone" class="lineup-paste-zone" tabindex="0">Можно также вставить скопированный скриншот сюда или нажать Ctrl + V</div></div><div id="lineupImagePreview" style="margin-top:10px"></div></div>
+      <div class="formrow"><label for="lineupPurpose">Описание</label><textarea id="lineupPurpose" rows="3" placeholder="Описание раскидки"></textarea></div>
+      <button class="btn primary" id="addLineup">＋ Сохранить гранату</button>
+    </div>
+    <div class="panel" style="margin-top:14px">
+      <h3 class="panelhead">Библиотека сохранённых гранат</h3>
+      <div class="lineup-filter"><label for="lineupMapFilter">Показать гранаты на карте</label><select id="lineupMapFilter" class="filter-select"><option value="all">Все карты</option><option>Mirage</option><option>Inferno</option><option>Ancient</option><option>Nuke</option><option>Dust2</option><option>Anubis</option><option>Overpass</option><option>Vertigo</option></select></div>
+      <div id="lineupList" class="journal-list"><div class="empty">Пока нет сохранённых гранат. Добавь первую выше.</div></div>
+    </div>
+  </section>
+  <section id="music" class="section">
+    <div class="panel music-hub">
+      <div class="music-heading-row"><div><h2 class="panelhead"><span class="ico">♫</span> Музыкальный центр</h2><p class="muted small music-subtitle">Собственный плеер HZCHP · без музыкальных виджетов</p></div><span class="music-count" id="musicCount">0 треков и ссылок</span></div>
+      <div class="music-layout music-hub-layout">
+        <aside class="music-controls music-library-panel">
+          <div class="music-section-label">ДОБАВИТЬ МУЗЫКУ</div>
+          <div class="formrow"><label for="musicAudioUrl">Прямая ссылка на аудиофайл</label><input id="musicAudioUrl" type="url" placeholder="https://…/track.mp3" autocomplete="off" inputmode="url"></div>
+          <div class="formrow"><label for="musicAudioTitle">Название трека (необязательно)</label><input id="musicAudioTitle" type="text" placeholder="Например, Warmup track" autocomplete="off"></div>
+          <button class="btn primary music-add-btn" id="addMusicAudioUrl" type="button">＋ Добавить аудио</button>
+          <div class="music-file-add" style="margin-top:9px"><label for="musicAudioFiles" class="btn" style="cursor:pointer;flex:1;text-align:center">Выбрать аудиофайлы</label><input id="musicAudioFiles" type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac,.aac,.opus" multiple></div>
+          <div id="musicDropzone" class="music-dropzone">Или перетащи аудиофайлы сюда</div>
+          <div id="musicStatus" class="muted small music-status" role="status" aria-live="polite">Добавь аудиофайл или прямую ссылку на аудио. Ссылки на сервисы можно хранить отдельно.</div>
+          <div class="music-divider"></div>
+          <div class="music-section-label">СОХРАНИТЬ ССЫЛКУ НА ПЛЕЙЛИСТ</div>
+          <div class="formrow"><label for="musicUrl">Spotify, SoundCloud или Яндекс Музыка</label><input id="musicUrl" type="text" placeholder="Вставь ссылку на плейлист…" autocomplete="off" inputmode="url"></div>
+          <div class="formrow"><label for="musicTitle">Название ссылки</label><input id="musicTitle" type="text" placeholder="Например, FACEIT warmup" autocomplete="off"></div>
+          <button class="btn music-add-btn" id="addMusicPlaylist" type="button">＋ Сохранить ссылку</button>
+          <div class="music-divider"></div>
+          <div class="music-library-head"><div class="music-section-label">МОЯ БИБЛИОТЕКА</div><span id="musicLibraryCount" class="muted small">0</span></div>
+          <input id="musicSearch" class="music-search" type="text" placeholder="Поиск по библиотеке…" aria-label="Поиск по библиотеке">
+          <select id="musicFilter" class="filter-select music-filter" aria-label="Фильтр по типу"><option value="all">Всё</option><option value="audio">Аудиотреки</option><option value="spotify">Spotify</option><option value="soundcloud">SoundCloud</option><option value="yandex">Яндекс Музыка</option></select>
+          <div id="musicLibrary" class="music-library-list"><div class="empty">Здесь появятся треки и сохранённые ссылки.</div></div>
+        </aside>
+        <div class="music-player music-player-panel">
+          <div class="music-now-head"><div class="music-now-cover" id="musicNowCover"><span>♫</span></div><div class="music-now-meta"><div class="music-section-label">HZCHP PLAYER</div><h3 id="musicNowTitle">Ничего не играет</h3><div id="musicNowService" class="muted small">Добавь аудиофайл или прямую ссылку</div></div></div>
+          <div id="musicEmpty" class="music-empty"><div class="music-empty-icon"><span>♫</span></div><strong>Твой звук — твои правила</strong><p>Собственный плеер воспроизводит аудиофайлы и прямые ссылки на аудио. Ссылки на музыкальные сервисы сохраняются как закладки.</p></div>
+          <div id="musicNativePlayer" class="music-native-player" style="display:none">
+            <div class="music-native-art"><span>♫</span></div>
+            <div class="music-track-title" id="musicTrackTitle">Трек</div><div class="music-track-sub" id="musicTrackSub">Локальный файл</div>
+            <audio id="musicAudio" preload="metadata"></audio>
+            <input id="musicProgress" class="music-progress" type="range" min="0" max="1000" value="0" aria-label="Позиция воспроизведения">
+            <div class="music-time-row"><span id="musicCurrentTime">0:00</span><span id="musicDuration">0:00</span></div>
+            <div class="music-transport"><button id="musicPrev" type="button" aria-label="Предыдущий трек" title="Предыдущий">|◀</button><button id="musicPlayPause" class="music-play-main" type="button" aria-label="Воспроизвести" title="Воспроизвести">▶</button><button id="musicNext" type="button" aria-label="Следующий трек" title="Следующий">▶|</button></div>
+            <div class="music-native-volume"><span aria-hidden="true">◖</span><input id="musicPlayerVolume" type="range" min="0" max="100" value="70" aria-label="Громкость музыки"><span id="musicPlayerVolumeValue">70%</span></div>
+          </div>
+          <div class="music-player-footer"><div class="music-player-actions"><button class="btn" id="openMusicExternal" type="button" disabled>Открыть ссылку ↗</button><button class="btn danger" id="removeMusicCurrent" type="button" disabled>Удалить из библиотеки</button></div><div class="muted small" id="musicVolumeNote" style="margin-top:10px">Громкость управляется собственным плеером HZCHP.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="settings" class="section">
+    <div class="panel"><h2 class="panelhead"><svg class="section-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.5a7.4 7.4 0 0 0 0-3l1.6-1.2-1.8-3.1-1.9.7a7.3 7.3 0 0 0-2.6-1.5L14 3h-4l-.3 2.4A7.3 7.3 0 0 0 7.1 7l-1.9-.7-1.8 3.1L5 10.6a7.4 7.4 0 0 0 0 3l-1.6 1.2 1.8 3.1 1.9-.7a7.3 7.3 0 0 0 2.6 1.5L10 21h4l.3-2.4a7.3 7.3 0 0 0 2.6-1.5l1.9.7 1.8-3.1z"/></svg> Настройки</h2>
+      <div class="volume-master"><div class="volume-master-head"><div><strong>Громкость сайта</strong><div class="muted small">Общий уровень для встроенных аудио- и видеоплееров</div></div><span class="volume-value" id="siteVolumeValue">100%</span></div><div class="volume-slider-row"><span aria-hidden="true">−</span><input id="siteVolume" type="range" min="0" max="100" value="100" aria-label="Громкость сайта"><span aria-hidden="true">＋</span></div><div class="volume-meter"><span id="siteVolumeMeter"></span></div><div class="muted small" style="margin-top:10px">Ползунок регулирует звук аудио и видео внутри HZCHP. Музыкальный центр использует собственный HTML5-плеер; громкость сторонних сайтов не контролируется.</div></div>
+      <div style="margin-top:24px"><h3 style="margin:0">Тема оформления</h3><div class="muted small">Выбери внешний вид интерфейса</div><div class="theme-options">
+        <button type="button" class="theme-choice" data-theme-choice="dark"><span class="theme-swatch" style="background:linear-gradient(135deg,#070711,#211443 70%,#8b5cf6)"></span><strong>Тёмно-фиолетовая</strong><span class="muted small">Оригинальная тема</span></button>
+        <button type="button" class="theme-choice" data-theme-choice="ash"><span class="theme-swatch" style="background:linear-gradient(135deg,#17181d,#30313a 70%,#85899a)"></span><strong>Пепельная</strong><span class="muted small">Тёмно-серая</span></button>
+        <button type="button" class="theme-choice" data-theme-choice="light"><span class="theme-swatch" style="background:linear-gradient(135deg,#fff,#eee8ff 70%,#8054e8)"></span><strong>Светлая</strong><span class="muted small">Светлый интерфейс</span></button>
+        <button type="button" class="theme-choice" data-theme-choice="faceit"><span class="theme-swatch" style="background:linear-gradient(135deg,#101114,#29211e 70%,#ff5500)"></span><strong>FACEIT</strong><span class="muted small">Графитовая с оранжевыми акцентами</span></button>
+      </div></div>
+    </div>
+      <div class="panel" style="margin-top:14px"><h3 class="panelhead">Резервное копирование</h3><p class="muted small">Сохрани дневник, ELO, тренировки, настройки и базу раскидок в JSON-файл. Импорт заменит текущие данные.</p><div class="actions"><button class="btn primary" id="backupExport">↓ Скачать резервную копию</button><label class="btn" for="backupImport" style="display:inline-flex;align-items:center;cursor:pointer">↑ Импортировать копию</label><input id="backupImport" type="file" accept=".json,application/json" hidden></div><div id="backupStatus" class="muted small" style="margin-top:8px"></div></div>
+  </section>
+</main>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const storeKey='roadToFaceitLvl10_v2';
+let data={tasks:[false,false,false,false,false],entries:[],eloHistory:[],weeklyFocus:'',demos:[],customPlan:[],trainingDays:[],lineups:[],mistakes:[],mapStatus:{},skillRatings:{}};
+try{const saved=JSON.parse(localStorage.getItem(storeKey)||'null');if(saved)data={...data,...saved}}catch(e){}
+function persist(){try{localStorage.setItem(storeKey,JSON.stringify(data))}catch(e){}}
+function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function prettyDate(s){if(!s)return '';const [y,m,d]=s.split('-');return `${d}.${m}.${y}`}
+$('journalDate').value=today();$('eloDate').value=today();
+if($('dayline'))$('dayline').textContent=new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})+' · Без спешки, по одному блоку за раз.';
+function renderTasks(){document.querySelectorAll('[data-task]').forEach(el=>{const i=+el.dataset.task;el.checked=!!data.tasks[i];el.closest('.task').classList.toggle('done',!!data.tasks[i])});const n=data.tasks.filter(Boolean).length;if($('taskCount'))$('taskCount').textContent=`${n} из 5 блоков выполнено`;if($('taskBar'))$('taskBar').style.width=`${n/5*100}%`}
+document.querySelectorAll('[data-task]').forEach(el=>el.addEventListener('change',()=>{data.tasks[+el.dataset.task]=el.checked;persist();renderTasks()}));
+$('resetTasks').onclick=()=>{data.tasks=[false,false,false,false,false];persist();renderTasks()};
+$('allTasks').onclick=()=>{data.tasks=[true,true,true,true,true];persist();renderTasks()};
+$('eloInput').value=localStorage.getItem('roadToFaceitElo')||'1600';
+function renderElo(){const raw=$('eloInput').value.replace(/[^0-9]/g,'');const v=Math.max(0,Number(raw)||0);$('remaining').textContent=Math.max(0,2000-v);$('eloBar').style.width=Math.min(100,v/2000*100)+'%';localStorage.setItem('roadToFaceitElo',String(v))}
+$('eloInput').addEventListener('input',renderElo);renderElo();
+$('weeklyFocus').value=data.weeklyFocus||'';$('weeklyFocus').addEventListener('input',()=>{data.weeklyFocus=$('weeklyFocus').value;persist()});
+$('saveEntry').onclick=()=>{const date=$('journalDate').value||today();const entry={date,type:$('sessionType').value,minutes:Math.max(0,Math.min(600,Number($('sessionMinutes').value)||0)),rating:$('sessionRating').value,good:$('good').value.trim(),weak:$('weak').value.trim(),next:$('next').value.trim()};if(!entry.good&&!entry.weak&&!entry.next){$('saveMessage').textContent='Добавь хотя бы одну заметку перед сохранением.';return}data.entries=data.entries.filter(e=>e.date!==date);data.entries.unshift(entry);data.entries.sort((a,b)=>b.date.localeCompare(a.date));persist();renderEntries();renderHomeRecent();$('saveMessage').textContent='Запись сохранена.'};
+function entryCard(e,withDelete=false){const box=document.createElement('div');box.className='entry';const title=document.createElement('strong');title.textContent=prettyDate(e.date);box.appendChild(title);const meta=document.createElement('div');meta.className='entry-meta';if(e.type){const t=document.createElement('span');t.className='entry-tag';t.textContent=e.type;meta.appendChild(t)}if(e.minutes){const t=document.createElement('span');t.className='entry-tag';t.textContent=e.minutes+' мин';meta.appendChild(t)}if(e.rating){const t=document.createElement('span');t.className='entry-tag';t.textContent='Оценка '+e.rating+'/5';meta.appendChild(t)}if(meta.childNodes.length)box.appendChild(meta);[['Получалось',e.good],['Слабое место',e.weak],['На следующий раз',e.next]].forEach(([label,val])=>{if(val){const p=document.createElement('p');p.textContent=label+': '+val;box.appendChild(p)}});if(withDelete){const actions=document.createElement('div');actions.className='entry-actions';const del=document.createElement('button');del.className='btn';del.textContent='Удалить';del.onclick=()=>{if(!confirm('Удалить запись за '+prettyDate(e.date)+'?'))return;data.entries=data.entries.filter(x=>x.date!==e.date);persist();renderEntries();renderHomeRecent()};actions.appendChild(del);box.appendChild(actions)}return box}
+function renderEntries(){const root=$('entries');root.innerHTML='';const q=($('journalSearch')?.value||'').toLowerCase();const f=$('journalFilter')?.value||'all';const list=data.entries.filter(e=>(f==='all'||(e.type||'Другое')===f)&&[e.good,e.weak,e.next,e.type].join(' ').toLowerCase().includes(q));$('journalSummary').textContent=`Показано записей: ${list.length} · всего: ${data.entries.length}`;if(!list.length){root.innerHTML='<div class="empty">Подходящих записей нет.</div>';return}list.forEach(e=>root.appendChild(entryCard(e,true)))}
+function renderHomeRecent(){const root=$('homeRecentEntries');if(!root)return;root.innerHTML='';if(!data.entries.length){root.innerHTML='<div class="empty">Записей пока нет.</div>';return}data.entries.slice(0,2).forEach(e=>root.appendChild(entryCard(e,false)))}
+$('journalSearch').addEventListener('input',renderEntries);$('journalFilter').addEventListener('change',renderEntries);
+$('clearJournalForm').onclick=()=>{['good','weak','next'].forEach(id=>$(id).value='');$('sessionMinutes').value='';$('sessionRating').value='';$('saveMessage').textContent='Форма очищена.'};
+document.querySelectorAll('[data-section-link]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===b.dataset.sectionLink));document.querySelectorAll('.nav button').forEach(n=>n.classList.toggle('active',n.dataset.section===b.dataset.sectionLink));window.scrollTo({top:0,behavior:'smooth'})}));
+$('addElo').onclick=()=>{const v=Number($('eloValue').value);const date=$('eloDate').value||today();if(!Number.isFinite(v)||v<0){alert('Введи корректное значение ELO.');return}data.eloHistory=data.eloHistory.filter(e=>e.date!==date);data.eloHistory.push({date,elo:v});data.eloHistory.sort((a,b)=>a.date.localeCompare(b.date));$('eloInput').value=v;renderElo();persist();renderHistory();$('eloValue').value=''};
+function renderHistory(){const root=$('eloHistory');root.innerHTML='';if(!data.eloHistory.length){root.innerHTML='<div class="empty">История пока пустая.</div>';drawEloChart();return}data.eloHistory.slice().reverse().forEach(e=>{const row=document.createElement('div');row.className='historyrow';const date=document.createElement('span');date.textContent=prettyDate(e.date);const val=document.createElement('strong');val.textContent=e.elo+' ELO';const del=document.createElement('button');del.className='btn';del.textContent='Удалить';del.onclick=()=>{data.eloHistory=data.eloHistory.filter(x=>x.date!==e.date);persist();renderHistory()};row.append(date,val,del);root.appendChild(row)});drawEloChart()}
+function drawEloChart(){const root=$('eloChart');if(!root)return;const points=(data.eloHistory||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));$('eloChartCurrent').textContent=points.length?points[points.length-1].elo+' ELO':'—';if(!points.length){root.innerHTML='<div class="empty">Добавь отметки ELO — здесь появится график.</div>';return}const W=640,H=300,L=48,R=18,T=20,B=48,iw=W-L-R,ih=H-T-B;const vals=points.map(p=>Number(p.elo)||0);let min=Math.min(...vals),max=Math.max(...vals);if(min===max){min=Math.max(0,min-100);max+=100}else{const pad=(max-min)*.15;min=Math.max(0,min-pad);max+=pad}const x=i=>L+(points.length===1?iw/2:i/(points.length-1)*iw),y=v=>T+(max-v)/(max-min)*ih,coords=points.map((p,i)=>[x(i),y(Number(p.elo)||0)]);const line=coords.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' '),area=line+` L ${coords[coords.length-1][0]} ${T+ih} L ${coords[0][0]} ${T+ih} Z`;let grid='';for(let i=0;i<5;i++){const yy=T+i*ih/4,val=Math.round(max-i*(max-min)/4);grid+=`<line class="chart-grid" x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}"/><text class="chart-label" x="${L-8}" y="${yy+4}" text-anchor="end">${val}</text>`}const dots=coords.map((p,i)=>`<circle class="chart-dot" cx="${p[0]}" cy="${p[1]}" r="4"><title>${prettyDate(points[i].date)} · ${points[i].elo} ELO</title></circle>`).join('');const labels=points.map((p,i)=>{if(points.length>7&&i!==0&&i!==points.length-1&&i%Math.ceil(points.length/5)!==0)return '';return `<text class="chart-label" x="${x(i)}" y="${H-20}" text-anchor="middle">${prettyDate(p.date)}</text>`}).join('');root.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="График изменения ELO по датам">${grid}<path class="chart-area" d="${area}"/><path class="chart-line" d="${line}"/>${dots}${labels}</svg>`}
+$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({...data,currentElo:Number($('eloInput').value)||0},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='faceit_training_backup.json';a.click();URL.revokeObjectURL(a.href)};
+document.querySelectorAll('[data-section]').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('[data-section]').forEach(b=>b.classList.toggle('active',b===btn));document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===btn.dataset.section))});
+
+// Demo storage: metadata + IndexedDB file blobs so larger files are not squeezed into localStorage.
+const DB_NAME='faceitDemoStorage', DB_STORE='files';
+function openDemoDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(DB_STORE))req.result.createObjectStore(DB_STORE)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function putDemoFile(id,file){const db=await openDemoDB();return new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(file,id);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+async function getDemoFile(id){const db=await openDemoDB();return new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readonly');const req=tx.objectStore(DB_STORE).get(id);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function deleteDemoFile(id){const db=await openDemoDB();return new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).delete(id);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+function fmtSize(n){if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFixed(1)+' KB';if(n<1024*1024*1024)return (n/1024/1024).toFixed(1)+' MB';return (n/1024/1024/1024).toFixed(2)+' GB'}
+function renderDemos(){const root=$('demoList');root.innerHTML='';if(!data.demos.length){root.innerHTML='<div class="empty">Пока нет демок. Выбери файлы выше, чтобы добавить их сюда.</div>';return}data.demos.forEach(d=>{const card=document.createElement('div');card.className='entry';const head=document.createElement('div');head.style.cssText='display:flex;justify-content:space-between;gap:12px;align-items:start;flex-wrap:wrap';const info=document.createElement('div');const name=document.createElement('strong');name.textContent=d.name;const meta=document.createElement('div');meta.className='muted small';meta.textContent=fmtSize(d.size)+' · добавлено '+prettyDate(d.added);info.append(name,meta);head.append(info);const buttons=document.createElement('div');buttons.className='actions';buttons.style.marginTop='0';const download=document.createElement('button');download.className='btn primary';download.textContent='Скачать файл';download.onclick=async()=>{try{const file=await getDemoFile(d.id);if(!file){alert('Файл не найден в хранилище. Добавь его заново.');return}const url=URL.createObjectURL(file);const a=document.createElement('a');a.href=url;a.download=d.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch(e){alert('Не удалось открыть файл из хранилища.')}};const remove=document.createElement('button');remove.className='btn';remove.textContent='Удалить';remove.onclick=async()=>{if(!confirm('Убрать этот файл из хранилища?'))return;try{await deleteDemoFile(d.id)}catch(e){}data.demos=data.demos.filter(x=>x.id!==d.id);persist();renderDemos()};buttons.append(download,remove);head.append(buttons);card.append(head);if(d.note){const note=document.createElement('p');note.textContent=d.note;card.append(note)}root.append(card)})}
+$('demoFiles').addEventListener('change',()=>{const files=[...$('demoFiles').files];$('demoFileName').textContent=files.length?files.map(f=>f.name).join(', '):'Файлы не выбраны'});
+$('addDemos').onclick=async()=>{const files=[...$('demoFiles').files];if(!files.length){alert('Сначала выбери один или несколько файлов.');return}const note=$('demoNote').value.trim();const btn=$('addDemos');btn.disabled=true;btn.textContent='Добавляю…';try{for(const file of files){const id=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+'_'+Math.random().toString(16).slice(2));await putDemoFile(id,file);data.demos.unshift({id,name:file.name,size:file.size,added:today(),note})}persist();renderDemos();$('demoFiles').value='';$('demoNote').value=''}catch(e){alert('Не удалось сохранить файл. Возможно, в браузере закончилось место.')}finally{btn.disabled=false;btn.textContent='Добавить в список'}};
+$('clearDemos').onclick=async()=>{if(!data.demos.length)return;if(!confirm('Удалить все файлы из этого списка?'))return;for(const d of data.demos){try{await deleteDemoFile(d.id)}catch(e){}}data.demos=[];persist();renderDemos()};
+
+
+// HZCHP Native Music Center — собственный HTML5-плеер без сторонних музыкальных виджетов.
+const MUSIC_LIBRARY_KEY='hzchpMusicLibrary';
+let musicLibrary=[];
+try{musicLibrary=JSON.parse(localStorage.getItem(MUSIC_LIBRARY_KEY)||'[]');if(!Array.isArray(musicLibrary))musicLibrary=[]}catch(e){musicLibrary=[]}
+// Старые записи сервисов сохраняются как ссылки, но больше не встраиваются в страницу.
+let currentMusicId=null;
+let activeAudioItems=[];
+let objectUrls=new Map();
+const musicAudio=$('musicAudio');
+const musicVolumeInput=$('musicPlayerVolume');
+const savedMusicVolume=localStorage.getItem('hzchpMusicVolume');
+if(savedMusicVolume!==null)musicVolumeInput.value=Math.max(0,Math.min(100,Number(savedMusicVolume)||0));
+$('musicPlayerVolumeValue').textContent=musicVolumeInput.value+'%';
+musicAudio.volume=Number(musicVolumeInput.value)/100;
+function saveMusicLibrary(){localStorage.setItem(MUSIC_LIBRARY_KEY,JSON.stringify(musicLibrary.filter(x=>x.kind!=='local')))}
+function detectMusicLink(raw){let u;try{u=new URL(raw.trim())}catch(e){return null}const host=u.hostname.toLowerCase().replace(/^www\./,'');if(['open.spotify.com','spotify.link'].includes(host)){if(host==='spotify.link')return {service:'spotify',url:u.href,short:true};const p=u.pathname.split('/').filter(Boolean);if(p.length>=2&&['playlist','album','track','episode','show'].includes(p[0]))return {service:'spotify',url:'https://open.spotify.com/'+p[0]+'/'+p[1]}}if(host==='soundcloud.com'||host==='m.soundcloud.com'){if(u.pathname.split('/').filter(Boolean).length>=2)return {service:'soundcloud',url:u.origin+u.pathname.replace(/\/$/,'')}}if(['music.yandex.ru','music.yandex.com','music.yandex.kz','music.yandex.by','music.yandex.uz','music.yandex.az','music.yandex.com.tr','music.yandex.de'].includes(host)){const p=u.pathname.split('/').filter(Boolean);const users=p.indexOf('users');if(users>=0&&p[users+1]&&p[users+2]==='playlists'&&p[users+3])return {service:'yandex',url:'https://'+host+'/users/'+p[users+1]+'/playlists/'+p[users+3]};const playlists=p.indexOf('playlists');if(playlists>=0&&p[playlists+1])return {service:'yandex',url:'https://'+host+'/playlists/'+p[playlists+1]};if(p[0]==='album'&&p[1])return {service:'yandex',url:'https://'+host+'/album/'+p[1]}}return null}
+function musicServiceName(service){return service==='spotify'?'Spotify':service==='soundcloud'?'SoundCloud':service==='yandex'?'Яндекс Музыка':service==='direct'?'Прямая ссылка':'Локальный файл'}
+function musicServiceMark(service){return service==='spotify'?'●':service==='soundcloud'?'☁':service==='yandex'?'Я':service==='direct'?'↗':'♫'}
+function musicCurrent(){return musicLibrary.find(x=>x.id===currentMusicId)||null}
+function setMusicStatus(text){$('musicStatus').textContent=text}
+function isPlayable(item){return !!item&&(item.kind==='audio'||item.kind==='local')}
+function musicAudioUrl(item){return item.kind==='local'?objectUrls.get(item.id):item.url}
+function renderMusicLibrary(){const root=$('musicLibrary');root.innerHTML='';const query=$('musicSearch').value.trim().toLowerCase();const filter=$('musicFilter').value;const filtered=musicLibrary.filter(item=>(filter==='all'||(filter==='audio'?isPlayable(item):item.service===filter))&&(!query||((item.title||'')+' '+musicServiceName(item.service)+' '+(item.url||'')).toLowerCase().includes(query)));$('musicCount').textContent=musicLibrary.length+' '+(musicLibrary.length===1?'элемент':musicLibrary.length>=2&&musicLibrary.length<=4?'элемента':'элементов');$('musicLibraryCount').textContent=filtered.length;if(!filtered.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=musicLibrary.length?'Ничего не найдено.':'Здесь появятся треки и сохранённые ссылки.';root.append(empty);return}filtered.forEach(item=>{const btn=document.createElement('button');btn.type='button';btn.className='music-library-item'+(item.id===currentMusicId?' active':'');btn.setAttribute('aria-pressed',String(item.id===currentMusicId));const mark=document.createElement('span');mark.className='music-service-mark '+(item.service||'local');mark.textContent=musicServiceMark(item.service);const info=document.createElement('span');info.className='music-item-info';const title=document.createElement('span');title.className='music-item-title';title.textContent=item.title||musicServiceName(item.service);const service=document.createElement('span');service.className='music-item-service';service.textContent=isPlayable(item)?musicServiceName(item.service)+' · '+(item.kind==='local'?'файл':'аудио URL'):musicServiceName(item.service)+' · сохранённая ссылка';info.append(title,service);const play=document.createElement('span');play.className='music-item-play';play.textContent=item.id===currentMusicId&&isPlayable(item)&&!musicAudio.paused?'Ⅱ':isPlayable(item)?'▶':'↗';play.setAttribute('aria-hidden','true');btn.append(mark,info,play);btn.onclick=()=>selectMusic(item.id);root.append(btn)})}
+function selectMusic(id){const item=musicLibrary.find(x=>x.id===id);if(!item)return;currentMusicId=id;$('musicNowTitle').textContent=item.title||musicServiceName(item.service);$('musicNowService').textContent=musicServiceName(item.service)+(isPlayable(item)?' · собственный плеер':' · ссылка сохранена');$('musicNowCover').innerHTML='<span>'+musicServiceMark(item.service)+'</span>';$('openMusicExternal').disabled=!item.url;$('removeMusicCurrent').disabled=false;if(isPlayable(item)){const src=musicAudioUrl(item);if(!src){setMusicStatus('Локальный файл доступен только до перезагрузки страницы. Добавь его заново для воспроизведения.');return}$('musicEmpty').style.display='none';$('musicNativePlayer').style.display='block';$('musicTrackTitle').textContent=item.title||musicServiceName(item.service);$('musicTrackSub').textContent=item.kind==='local'?'Локальный аудиофайл': 'Прямая аудиоссылка';if(musicAudio.src!==src){musicAudio.src=src;musicAudio.load()}musicAudio.play().then(()=>{ $('musicPlayPause').textContent='Ⅱ';$('musicPlayPause').setAttribute('aria-label','Пауза');renderMusicLibrary();}).catch(()=>{ $('musicPlayPause').textContent='▶';setMusicStatus('Трек выбран. Нажми ▶ для воспроизведения или проверь доступность аудиоссылки.');});setMusicStatus('Воспроизводится через собственный HTML5-плеер HZCHP.')}else{$('musicNativePlayer').style.display='none';$('musicEmpty').style.display='flex';$('musicEmpty').querySelector('strong').textContent='Ссылка сохранена';$('musicEmpty').querySelector('p').textContent='Это ссылка на каталог стороннего сервиса, а не аудиофайл. Без виджета или разрешённого API сервис не передаёт трек собственному плееру. Открой ссылку кнопкой ниже либо добавь аудиофайл.';musicAudio.pause();musicAudio.removeAttribute('src');musicAudio.load();$('musicPlayPause').textContent='▶';setMusicStatus('Ссылка сохранена без встроенного плеера. Для воспроизведения внутри HZCHP добавь аудиофайл или прямую аудиоссылку.')}renderMusicLibrary()}
+function addMusicPlaylist(){const raw=$('musicUrl').value.trim();if(!raw){setMusicStatus('Сначала вставь ссылку на плейлист.');$('musicUrl').focus();return}const detected=detectMusicLink(raw);if(!detected){setMusicStatus('Не удалось определить сервис. Поддерживаются Spotify, SoundCloud и Яндекс Музыка.');return}const existing=musicLibrary.find(x=>x.url===detected.url);if(existing){$('musicUrl').value='';selectMusic(existing.id);setMusicStatus('Эта ссылка уже есть в библиотеке.');return}const defaultTitle='Плейлист '+musicServiceName(detected.service);const item={id:'music_'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'_'+Math.random().toString(16).slice(2)),kind:'bookmark',url:detected.url,service:detected.service,title:$('musicTitle').value.trim()||defaultTitle,added:new Date().toISOString()};musicLibrary.unshift(item);saveMusicLibrary();$('musicUrl').value='';$('musicTitle').value='';$('musicSearch').value='';$('musicFilter').value='all';selectMusic(item.id);setMusicStatus('Ссылка сохранена. Для неё не используется виджет.');}
+function addDirectAudio(){const raw=$('musicAudioUrl').value.trim();if(!raw){setMusicStatus('Вставь прямую ссылку на аудиофайл.');return}let u;try{u=new URL(raw);if(!['http:','https:','blob:'].includes(u.protocol))throw 0}catch(e){setMusicStatus('Укажи корректную прямую HTTP(S)-ссылку на аудиофайл. Ссылка на страницу плейлиста не подойдёт.');return}const item={id:'audio_'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'_'+Math.random().toString(16).slice(2)),kind:'audio',service:'direct',url:u.href,title:$('musicAudioTitle').value.trim()||decodeURIComponent(u.pathname.split('/').pop()||'Аудиотрек'),added:new Date().toISOString()};musicLibrary.unshift(item);saveMusicLibrary();$('musicAudioUrl').value='';$('musicAudioTitle').value='';$('musicSearch').value='';$('musicFilter').value='all';selectMusic(item.id)}
+function addLocalFiles(files){const list=[...files].filter(f=>f.type.startsWith('audio/')||/\.(mp3|wav|ogg|m4a|flac|aac|opus)$/i.test(f.name));if(!list.length){setMusicStatus('Выбери аудиофайлы поддерживаемого формата.');return}const newItems=list.map(file=>{const id='local_'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'_'+Math.random().toString(16).slice(2));objectUrls.set(id,URL.createObjectURL(file));return {id,kind:'local',service:'local',title:file.name.replace(/\.[^.]+$/,''),fileName:file.name,added:new Date().toISOString()}});musicLibrary.unshift(...newItems);activeAudioItems=musicLibrary.filter(isPlayable);saveMusicLibrary();renderMusicLibrary();selectMusic(newItems[0].id);setMusicStatus('Добавлено аудиофайлов: '+newItems.length+'. Локальные файлы доступны в текущем сеансе браузера.');}
+function formatMusicTime(sec){if(!Number.isFinite(sec)||sec<0)return '0:00';const m=Math.floor(sec/60),s=Math.floor(sec%60);return m+':'+String(s).padStart(2,'0')}
+function updateMusicProgress(){const duration=musicAudio.duration||0;$('musicProgress').value=duration?Math.round(musicAudio.currentTime/duration*1000):0;$('musicCurrentTime').textContent=formatMusicTime(musicAudio.currentTime);$('musicDuration').textContent=formatMusicTime(duration)}
+function playNext(delta){const queue=musicLibrary.filter(isPlayable);if(!queue.length)return;let idx=queue.findIndex(x=>x.id===currentMusicId);idx=(idx+delta+queue.length)%queue.length;selectMusic(queue[idx].id)}
+$('addMusicPlaylist').addEventListener('click',addMusicPlaylist);$('musicUrl').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addMusicPlaylist()}});$('musicTitle').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addMusicPlaylist()}});$('addMusicAudioUrl').addEventListener('click',addDirectAudio);$('musicAudioUrl').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addDirectAudio()}});$('musicAudioTitle').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addDirectAudio()}});$('musicAudioFiles').addEventListener('change',e=>{addLocalFiles(e.target.files);e.target.value=''});$('musicSearch').addEventListener('input',renderMusicLibrary);$('musicFilter').addEventListener('change',renderMusicLibrary);
+const dropzone=$('musicDropzone');dropzone.addEventListener('click',()=>$('musicAudioFiles').click());dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('dragover')});dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('dragover'));dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('dragover');addLocalFiles(e.dataTransfer.files)});
+$('musicPlayPause').onclick=()=>{const item=musicCurrent();if(!item||!isPlayable(item)){setMusicStatus('Сначала выбери аудиотрек.');return}if(musicAudio.paused){musicAudio.play().then(()=>{$('musicPlayPause').textContent='Ⅱ';$('musicPlayPause').setAttribute('aria-label','Пауза');renderMusicLibrary()}).catch(()=>setMusicStatus('Не удалось воспроизвести аудио. Проверь ссылку или формат файла.'))}else{musicAudio.pause();$('musicPlayPause').textContent='▶';$('musicPlayPause').setAttribute('aria-label','Воспроизвести');renderMusicLibrary()}};
+$('musicPrev').onclick=()=>playNext(-1);$('musicNext').onclick=()=>playNext(1);musicAudio.addEventListener('timeupdate',updateMusicProgress);musicAudio.addEventListener('loadedmetadata',updateMusicProgress);musicAudio.addEventListener('play',()=>{$('musicPlayPause').textContent='Ⅱ';renderMusicLibrary()});musicAudio.addEventListener('pause',()=>{$('musicPlayPause').textContent='▶';renderMusicLibrary()});musicAudio.addEventListener('ended',()=>playNext(1));musicAudio.addEventListener('error',()=>{if(musicAudio.src)setMusicStatus('Браузер не смог загрузить аудио. Возможно, ссылка ведёт на страницу, требует авторизации или запрещает внешнее воспроизведение (CORS).')});$('musicProgress').addEventListener('input',()=>{if(musicAudio.duration)musicAudio.currentTime=Number($('musicProgress').value)/1000*musicAudio.duration});
+$('openMusicExternal').onclick=()=>{const item=musicCurrent();if(item&&item.url)window.open(item.url,'_blank','noopener,noreferrer')};$('removeMusicCurrent').onclick=()=>{const item=musicCurrent();if(!item)return;if(item.kind==='local'&&objectUrls.has(item.id)){URL.revokeObjectURL(objectUrls.get(item.id));objectUrls.delete(item.id)}if(item.id===currentMusicId){musicAudio.pause();musicAudio.removeAttribute('src');musicAudio.load()}musicLibrary=musicLibrary.filter(x=>x.id!==item.id);currentMusicId=null;saveMusicLibrary();$('musicNativePlayer').style.display='none';$('musicEmpty').style.display='flex';$('musicEmpty').querySelector('strong').textContent='Твой звук — твои правила';$('musicEmpty').querySelector('p').textContent='Собственный плеер воспроизводит аудиофайлы и прямые ссылки на аудио. Ссылки на музыкальные сервисы сохраняются как закладки.';$('musicNowTitle').textContent='Ничего не играет';$('musicNowService').textContent='Добавь аудиофайл или прямую ссылку';$('musicNowCover').innerHTML='<span>♫</span>';$('openMusicExternal').disabled=true;$('removeMusicCurrent').disabled=true;setMusicStatus('Элемент удалён из библиотеки.');renderMusicLibrary()};
+musicVolumeInput.addEventListener('input',()=>{const value=Number(musicVolumeInput.value);$('musicPlayerVolumeValue').textContent=value+'%';localStorage.setItem('hzchpMusicVolume',String(value));musicAudio.volume=value/100});
+renderMusicLibrary();
+
+// Настройки темы и громкости встроенных медиа.
+const savedTheme=localStorage.getItem("hzcpTheme")||"dark";
+function applyTheme(theme){document.body.dataset.theme=theme;localStorage.setItem("hzcpTheme",theme);document.querySelectorAll("[data-theme-choice]").forEach(b=>b.classList.toggle("active",b.dataset.themeChoice===theme));}
+applyTheme(savedTheme);
+const siteVolumeInput=$("siteVolume");
+siteVolumeInput.value=localStorage.getItem("hzcpSiteVolume")??100;
+function applySiteVolume(){const value=Number(siteVolumeInput.value)/100;$("siteVolumeValue").textContent=siteVolumeInput.value+"%";$("siteVolumeMeter").style.width=siteVolumeInput.value+"%";document.querySelectorAll("audio,video").forEach(media=>{media.volume=value});localStorage.setItem("hzcpSiteVolume",siteVolumeInput.value)}
+siteVolumeInput.addEventListener("input",applySiteVolume);applySiteVolume();
+document.addEventListener("play",e=>{if(e.target instanceof HTMLMediaElement)e.target.volume=Number(siteVolumeInput.value)/100},true);
+document.querySelectorAll("[data-theme-choice]").forEach(b=>b.addEventListener("click",()=>applyTheme(b.dataset.themeChoice)));
+// Mark a day as completed once all core blocks are checked.
+function syncTrainingDay(){const key=today();const all=data.tasks.length===5&&data.tasks.every(Boolean);if(all&&!data.trainingDays.includes(key))data.trainingDays.push(key);if(!all)data.trainingDays=data.trainingDays.filter(d=>d!==key);persist();renderCalendar()}
+const originalRenderTasks=renderTasks;
+renderTasks=function(){originalRenderTasks();const n=data.tasks.filter(Boolean).length;if($('trainingProgressLabel'))$('trainingProgressLabel').textContent=`${n} / 5` ;if($('trainingProgressBar'))$('trainingProgressBar').style.width=(n/5*100)+'%';syncTrainingDay()};
+let calendarCursor=new Date();calendarCursor.setDate(1);
+function renderCalendar(){const root=$('calendarGrid');if(!root)return;root.innerHTML='';$('calendarMonth').textContent=calendarCursor.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(d=>{const el=document.createElement('div');el.className='calendar-head';el.textContent=d;root.append(el)});const year=calendarCursor.getFullYear(),month=calendarCursor.getMonth();const first=(new Date(year,month,1).getDay()+6)%7;const days=new Date(year,month+1,0).getDate();for(let i=0;i<first;i++){const el=document.createElement('div');root.append(el)}for(let day=1;day<=days;day++){const key=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;const el=document.createElement('div');el.className='calendar-day'+(data.trainingDays.includes(key)?' done':'')+(key===today()?' today':'');el.textContent=day;el.title=data.trainingDays.includes(key)?'Тренировка выполнена':'';root.append(el)}}
+$('calendarPrev').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderCalendar()};$('calendarNext').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderCalendar()};
+function renderCustom(){const root=$('customList');root.innerHTML='';if(!data.customPlan.length){root.innerHTML='<div class="empty">Добавь свои упражнения.</div>';return}data.customPlan.forEach((item,i)=>{const row=document.createElement('div');row.className='custom-item';const text=document.createElement('div');text.className='grow';const name=document.createElement('strong');name.textContent=item.name;const dur=document.createElement('div');dur.className='muted small';dur.textContent=item.minutes+' мин';text.append(name,dur);const use=document.createElement('button');use.className='btn';use.textContent='Таймер';use.onclick=()=>{ $('timerMinutes').value=item.minutes; setTimerFromInput(); $('timerStatus').textContent='Таймер для: '+item.name };const del=document.createElement('button');del.className='btn';del.textContent='×';del.title='Удалить упражнение';del.onclick=()=>{data.customPlan.splice(i,1);persist();renderCustom()};row.append(text,use,del);root.append(row)})}
+$('addCustom').onclick=()=>{const name=$('customName').value.trim();const minutes=Math.max(1,Math.min(180,Number($('customDuration').value)||10));if(!name){$('customName').focus();return}data.customPlan.push({name,minutes});persist();renderCustom();$('customName').value=''};
+let timerRemaining=15*60,timerInterval=null;
+function showTimer(){const m=Math.floor(timerRemaining/60),s=timerRemaining%60;$('timerDisplay').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+function setTimerFromInput(){clearInterval(timerInterval);timerInterval=null;timerRemaining=Math.max(1,Math.min(180,Number($('timerMinutes').value)||15))*60;showTimer()}
+$('timerMinutes').addEventListener('change',setTimerFromInput);
+$('timerStart').onclick=()=>{if(timerInterval)return;if(timerRemaining<=0)setTimerFromInput();$('timerStatus').textContent='Тренировка идёт';timerInterval=setInterval(()=>{timerRemaining--;showTimer();if(timerRemaining<=0){clearInterval(timerInterval);timerInterval=null;$('timerStatus').textContent='Блок завершён — хорошая работа.';try{if('Notification'in window&&Notification.permission==='granted')new Notification('Таймер завершён',{body:'Время следующего блока или короткого перерыва.'})}catch(e){}}},1000)};
+$('timerPause').onclick=()=>{clearInterval(timerInterval);timerInterval=null;$('timerStatus').textContent='Пауза'};
+$('timerReset').onclick=()=>{setTimerFromInput();$('timerStatus').textContent='Таймер сброшен'};
+
+// Home modules: map preparation, self-assessed skills, and mistake review.
+const maps=['Mirage','Inferno','Ancient','Nuke','Dust2','Anubis'];
+function renderMaps(){const root=$('mapChecklist');if(!root)return;root.innerHTML='';maps.forEach(name=>{const row=document.createElement('div');row.className='map-item';const label=document.createElement('strong');label.textContent=name;const sel=document.createElement('select');sel.setAttribute('aria-label','Подготовка карты '+name);['Не готова','Повторить','Готов к игре'].forEach((v,i)=>{const o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o)});sel.value=(data.mapStatus||{})[name]||'Не готова';sel.onchange=()=>{data.mapStatus=data.mapStatus||{};data.mapStatus[name]=sel.value;persist()};row.append(label,sel);root.appendChild(row)})}
+const skills=['Аим','Контр-стрейф','Контроль спрея','Префайры','Гранаты','Позиционирование'];
+function renderWeakness(){const root=$('weaknessChecklist');root.innerHTML='';const ratings=data.skillRatings||{};const items=skills.map(name=>({name,score:Number(ratings[name]||3)}));items.forEach(({name,score})=>{const row=document.createElement('div');row.className='weakness-row'+(score<=2?' priority':'');const top=document.createElement('div');top.className='weakness-top';const label=document.createElement('div');label.className='weakness-name';label.textContent=name;const val=document.createElement('strong');val.className='weakness-score';val.textContent=score+'/5';top.append(label,val);const scale=document.createElement('div');scale.className='weakness-scale';scale.setAttribute('role','group');scale.setAttribute('aria-label','Оценка навыка: '+name);for(let n=1;n<=5;n++){const btn=document.createElement('button');btn.type='button';btn.textContent=n;btn.className=n===score?'selected':'';btn.setAttribute('aria-pressed',String(n===score));btn.onclick=()=>{data.skillRatings=data.skillRatings||{};data.skillRatings[name]=n;persist();renderWeakness()};scale.appendChild(btn)}row.append(top,scale);root.appendChild(row)});const summary=$('weaknessSummary');if(summary){const lowest=Math.min(...items.map(x=>x.score));const focus=items.filter(x=>x.score===lowest).map(x=>x.name);summary.innerHTML='';const label=document.createElement('span');label.className='weakness-summary-label';label.textContent=lowest<=2?'Приоритет на тренировку':'Зона для роста';const text=document.createElement('strong');text.textContent=focus.join(' · ');summary.append(label,text)}}
+function renderMistakes(){const root=$('mistakeList');root.innerHTML='';const list=data.mistakes||[];if(!list.length){root.innerHTML='<div class="empty">Пока нет записанных ошибок.</div>';return}list.slice(0,5).forEach((m,i)=>{const card=document.createElement('div');card.className='entry';const title=document.createElement('strong');title.textContent=m.title;const p=document.createElement('p');p.textContent='Исправление: '+m.fix;const row=document.createElement('div');row.className='entry-actions';const del=document.createElement('button');del.className='btn';del.textContent='Удалить';del.onclick=()=>{data.mistakes.splice(i,1);persist();renderMistakes()};row.appendChild(del);card.append(title,p,row);root.appendChild(card)})}
+$('addMistake').onclick=()=>{const title=$('mistakeTitle').value.trim(),fix=$('mistakeFix').value.trim();if(!title||!fix){alert('Заполни ошибку и способ исправления.');return}data.mistakes=data.mistakes||[];data.mistakes.unshift({title,fix,date:today()});persist();$('mistakeTitle').value='';$('mistakeFix').value='';renderMistakes()};
+
+// Interactive visual selectors: keep native values in sync with the existing save logic.
+document.querySelectorAll(".choice-buttons").forEach(group=>{
+  group.querySelectorAll(".choice-btn").forEach(btn=>btn.addEventListener("click",()=>{
+    group.querySelectorAll(".choice-btn").forEach(other=>other.classList.toggle("selected",other===btn));
+    const native=$(group.dataset.for); if(native){native.value=btn.dataset.value;native.dispatchEvent(new Event("change",{bubbles:true}));}
+  }));
+});
+
+// User-managed lineups library
+let lineupImageData="";
+$("lineupImage").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];lineupImageData="";$("lineupImagePreview").innerHTML="";if(!file)return;if(!file.type.startsWith("image/")){alert("Выбери файл изображения.");e.target.value="";return}try{lineupImageData=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const img=new Image();img.onerror=reject;img.onload=()=>{const max=1400,scale=Math.min(1,max/Math.max(img.width,img.height)),canvas=document.createElement("canvas");canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL("image/jpeg",.82))};img.src=reader.result};reader.readAsDataURL(file)});const preview=document.createElement("img");preview.src=lineupImageData;preview.alt="Предпросмотр скриншота";$("lineupImagePreview").append(preview)}catch(err){alert("Не удалось загрузить изображение.");lineupImageData="";e.target.value=""}});
+async function processLineupImage(file){if(!file||!file.type.startsWith("image/"))return;try{lineupImageData=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const img=new Image();img.onerror=reject;img.onload=()=>{const max=1400,scale=Math.min(1,max/Math.max(img.width,img.height)),canvas=document.createElement("canvas");canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL("image/jpeg",.82))};img.src=reader.result};reader.readAsDataURL(file)});$("lineupImagePreview").innerHTML="";const preview=document.createElement("img");preview.src=lineupImageData;preview.alt="Предпросмотр скриншота";$("lineupImagePreview").append(preview)}catch(err){alert("Не удалось загрузить изображение.")}}
+document.addEventListener("paste",e=>{const items=[...(e.clipboardData?.items||[])];const imageItem=items.find(x=>x.type.startsWith("image/"));if(!imageItem)return;const file=imageItem.getAsFile();if(file){e.preventDefault();processLineupImage(file);$("lineupPasteZone").textContent="Скриншот вставлен — можно сохранять гранату."}});
+$("lineupPasteZone")?.addEventListener("click",()=> $("lineupPasteZone").focus());
+function renderLineups(){const root=$("lineupList");if(!root)return;root.innerHTML="";const mf=$("lineupMapFilter").value;const list=(data.lineups||[]).filter(x=>mf==="all"||x.map===mf);if(!list.length){root.innerHTML='<div class="empty">Нет сохранённых гранат для выбранной карты.</div>';return}list.forEach(item=>{const card=document.createElement("div");card.className="entry";if(item.image){const img=document.createElement("img");img.src=item.image;img.alt="Скриншот: "+(item.name||"граната");img.style.cssText="display:block;width:100%;max-height:420px;object-fit:contain;border-radius:12px;margin-bottom:12px";card.append(img)}const title=document.createElement("strong");title.textContent=item.name||"Без названия";const meta=document.createElement("div");meta.className="entry-meta";[item.map,item.type].forEach(v=>{if(!v)return;const tag=document.createElement("span");tag.className="entry-tag";tag.textContent=v;meta.append(tag)});card.append(title,meta);if(item.purpose){const p=document.createElement("p");p.textContent=item.purpose;card.append(p)}const actions=document.createElement("div");actions.className="entry-actions";const del=document.createElement("button");del.className="btn";del.textContent="Удалить";del.onclick=()=>{data.lineups=data.lineups.filter(x=>x.id!==item.id);persist();renderLineups()};actions.append(del);card.append(actions);root.append(card)})}
+$("addLineup").onclick=()=>{const name=$("lineupName").value.trim();if(!name){$("lineupName").focus();return}data.lineups=data.lineups||[];data.lineups.unshift({id:Date.now()+Math.random().toString(16).slice(2),map:$("lineupMap").value,type:$("lineupType").value,name,image:lineupImageData,purpose:$("lineupPurpose").value.trim(),created:today()});try{persist()}catch(err){data.lineups.shift();alert("Не удалось сохранить. Возможно, хранилище браузера заполнено — попробуй скриншот меньшего размера.");return}$("lineupName").value="";$("lineupPurpose").value="";$("lineupImage").value="";$("lineupImagePreview").innerHTML="";lineupImageData="";renderLineups()};$("lineupMapFilter").addEventListener("change",renderLineups);
+// Compact full-data backup / restore
+function downloadBackup(){const payload={app:"HZCP ROAD TO 10 LVL",version:1,exportedAt:new Date().toISOString(),data:{...data,currentElo:Number($("eloInput").value)||0},settings:{theme:localStorage.getItem("hzcpTheme")||"dark",siteVolume:Number(localStorage.getItem("hzcpSiteVolume")||100)}};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="hzcp-backup-"+today()+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$("backupStatus").textContent="Резервная копия скачана."}
+$("backupExport").onclick=downloadBackup;$("backupImport").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const parsed=JSON.parse(await file.text());const incoming=parsed.data||parsed;if(!incoming||!Array.isArray(incoming.entries)||!Array.isArray(incoming.eloHistory))throw new Error("invalid");if(!confirm("Импорт заменит текущие данные сайта. Продолжить?"))return;data={...data,...incoming};persist();if(incoming.currentElo!==undefined){$("eloInput").value=String(incoming.currentElo);renderElo()}if(parsed.settings){if(parsed.settings.theme)applyTheme(parsed.settings.theme);localStorage.setItem("hzcpSiteVolume",String(parsed.settings.siteVolume??100));$("siteVolume").value=parsed.settings.siteVolume??100;applySiteVolume()}renderTasks();renderEntries();renderHomeRecent();renderHistory();renderDemos();renderMaps();renderWeakness();renderMistakes();renderLineups();$("backupStatus").textContent="Данные восстановлены из резервной копии."}catch(err){alert("Не удалось импортировать файл. Выбери JSON-копию HZCP.")}finally{e.target.value=""}});
+renderMaps();renderWeakness();renderMistakes();renderLineups();
+renderTasks();renderEntries();renderHistory();renderDemos();renderCalendar();renderCustom();showTimer();
+</script>
+</body></html>
