@@ -508,8 +508,8 @@ renderMaps();renderWeakness();renderMistakes();renderLineups();
 renderEntries();renderHistory();renderDemos();
 
 // ===== Статистика FACEIT =====
-const FACEIT_CLIENT_ID='202b4a8a-01bd-441a-8f9b-33da047f23e9';      // client_id OAuth2-приложения из developers.faceit.com
-const FACEIT_TOKEN_PROXY='https://old-sun-89f8.garmasovlev.workers.dev';    // URL вашего Cloudflare Worker: отдаёт статистику (хранит server-side ключ) и обменивает OAuth code на ник
+const FACEIT_SERVER_ID='202b4a8a-01bd-441a-8f9b-33da047f23e9';      // server_id OAuth2-приложения из developers.faceit.com
+const FACEIT_TOKEN_PROXY='https://faceit-helper.garmasovlev.workers.dev/';    // URL вашего Cloudflare Worker: отдаёт статистику (хранит server-side ключ) и обменивает OAuth code на ник
 const FC_LEVELS=[100,501,751,901,1051,1201,1351,1531,1751,2001];
 const stStatus=t=>{$('stStatus').textContent=t};
 const stEl=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e};
